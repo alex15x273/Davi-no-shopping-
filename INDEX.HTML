@@ -1,0 +1,1972 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Davi no Shopping</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: one centered game stage with a slim controls bar below it.
+   Single dark look by choice, so the game reads the same in any host theme. */
+:root {
+  --bg: #12162a;
+  --panel: #1b2040;
+  --line: #2d3466;
+  --ink: #eef0f8;
+  --muted: #a9b0cc;
+  --calm: #4fb6a6;
+  --alert: #f0644e;
+  --warm: #f2c230;
+  --font-display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  padding-block: 14px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 1000px; margin: 0 auto; display: grid; gap: 12px; }
+header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: 24px; margin: 0; letter-spacing: .01em; }
+header p { margin: 0; color: var(--muted); font-size: 14px; }
+#stage { position: relative; border-radius: 14px; overflow: hidden; background: #0c0f1f; border: 1px solid var(--line); touch-action: none; }
+canvas { display: block; width: 100%; }
+.overlay { position: absolute; inset: 0; display: flex; overflow: auto; padding: 14px; background: rgba(12,15,31,.86); }
+.overlay[hidden] { display: none; }
+.card { margin: auto; width: 100%; max-width: 540px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 12px; }
+.card h2 { font-family: var(--font-display); font-weight: 600; font-size: 26px; margin: 0; }
+.card p { margin: 0; }
+.muted { color: var(--muted); font-size: 13.5px; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 14px; margin: 0; }
+.keys dt { font-weight: 800; color: var(--calm); white-space: nowrap; }
+.keys dd { margin: 0; }
+.btn { font: inherit; font-weight: 800; font-size: 16px; border: 0; border-radius: 10px; padding: 12px 18px; background: var(--calm); color: #0b1a18; cursor: pointer; }
+.btn:hover { filter: brightness(1.08); }
+:focus-visible { outline: 3px solid var(--warm); outline-offset: 2px; }
+.stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.stat { flex: 1 1 90px; background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+.stat b { display: block; font-family: var(--font-display); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+.bar { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; color: var(--muted); font-size: 14px; }
+.bar label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.bar input { accent-color: var(--calm); width: 18px; height: 18px; }
+.bar select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; }
+.touch { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; user-select: none; -webkit-user-select: none; }
+canvas { outline: none; touch-action: none; cursor: grab; }
+.dpad { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 56px); gap: 4px; }
+.dpad button:nth-child(1) { grid-area: 1 / 2; } .dpad button:nth-child(2) { grid-area: 2 / 1; }
+.dpad button:nth-child(3) { grid-area: 2 / 3; } .dpad button:nth-child(4) { grid-area: 3 / 2; }
+.tb { font: inherit; font-weight: 800; font-size: 15px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; touch-action: none; }
+.tb:active, .tb.on { background: var(--calm); color: #0b1a18; }
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.acts .tb { min-height: 56px; }
+.puz { max-width: 560px; }
+.puzhead { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.puzhead h2 { font-size: 22px; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.sm { padding: 8px 14px; font-size: 14px; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.pads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-width: 320px; margin: 0 auto 10px; }
+.pad { aspect-ratio: 1.6; border-radius: 14px; border: 2px solid transparent; background: color-mix(in srgb, var(--c) 30%, #1b2040); cursor: pointer; }
+.pad.lit { background: var(--c); box-shadow: 0 0 24px var(--c); }
+.pad:disabled { cursor: default; }
+.grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.cell { font: 800 24px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; aspect-ratio: 1; cursor: pointer; padding: 0; }
+.cell.no { background: #4a2a35; }
+.cell.hl { border-color: var(--warm); background: #33305a; }
+.cards { display: grid; gap: 8px; }
+.stepc { text-align: left; font: 700 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; cursor: pointer; position: relative; }
+.stepc.done { border-color: var(--calm); background: #17323a; padding-left: 46px; cursor: default; }
+.stepc.done::before { content: attr(data-n); position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: var(--calm); color: #0b1a18; display: grid; place-items: center; font-weight: 800; }
+.stepc.no { background: #4a2a35; }
+.stepc.hl { border-color: var(--warm); }
+.pmsg { min-height: 1.4em; margin: 0; color: var(--calm); font-weight: 700; }
+.reveal { text-align: center; padding: 12px; background: var(--bg); border-radius: 12px; }
+.reveal b { display: block; font: 600 64px var(--font-display); color: var(--warm); line-height: 1.1; }
+.slots { display: flex; gap: 8px; justify-content: center; }
+.slot { flex: 1 1 0; min-width: 0; max-width: 56px; height: 64px; display: grid; place-items: center; font: 600 34px var(--font-display); background: var(--bg); border: 2px solid var(--line); border-radius: 10px; }
+.mem { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.mc { aspect-ratio: 1.15; font: 800 28px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; padding: 0; }
+.mc::after { content: '?'; color: var(--muted); }
+.mc.open::after, .mc.ok::after, .mc.peek::after { content: attr(data-s); color: var(--ink); }
+.mc.open { background: #263262; }
+.mc.ok { background: #17323a; border-color: var(--calm); cursor: default; }
+.mc.peek { background: #33305a; }
+.seq { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px; }
+.sq { width: 44px; height: 52px; display: grid; place-items: center; font: 800 26px var(--font-body); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+.sq.q { border: 2px dashed var(--warm); color: var(--warm); }
+.sq.hl { border-color: var(--warm); background: #33305a; }
+.opts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; max-width: 360px; margin: 0 auto; }
+.opt { font: 800 28px var(--font-body); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 0; cursor: pointer; }
+.opt.no { background: #4a2a35; }
+.lvlsel { display: grid; gap: 6px; }
+.lvlsel .btn.done::after { content: " ✓"; color: var(--calm); }
+#contRow { margin-bottom: 10px; }
+.lvlsel .btn { padding: 8px 12px; font-size: 13.5px; }
+.keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 280px; margin: 10px auto 0; }
+.keypad button { font: 800 20px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 0; cursor: pointer; }
+.keypad button.go { background: var(--calm); color: #0b1a18; border-color: var(--calm); }
+/* Desafios no celular: tela cheia, alvos de toque grandes */
+@media (max-width: 600px), (pointer: coarse) and (max-height: 520px) {
+  #puz { position: fixed; inset: 0; z-index: 30; padding: 0; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #puz .card { box-sizing: border-box; margin: 0; max-width: none; width: 100%; min-height: 100%; border: 0; border-radius: 0; gap: 14px; align-content: start; grid-template-rows: auto auto 1fr auto auto;
+    padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+  #puz .puzhead { position: sticky; top: 0; z-index: 3; background: var(--panel); padding: 6px 0 8px; }
+  #puz .puzhead h2 { font-size: 22px; }
+  #puz .puzhead .btn.sm { padding: 12px 16px; font-size: 16px; }
+  #puz #puzIntro { font-size: 16px; }
+  #puz .pmsg { font-size: 18px; min-height: 2.8em; display: flex; align-items: center; }
+  #puz #puzActions { position: sticky; bottom: 0; z-index: 3; background: var(--panel); padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
+  #puz #puzHint { width: 100%; padding: 15px; font-size: 18px; }
+  #puz button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  #puz .pads { max-width: none; gap: 14px; margin: 0 0 10px; }
+  #puz .pad { aspect-ratio: 1.25; border-radius: 18px; }
+  #puz #pPlay { width: 100%; padding: 14px; font-size: 17px; }
+  #puz .row { gap: 10px; }
+  #puz .grid { gap: 8px; }
+  #puz .cell { font-size: 28px; border-radius: 12px; }
+  #puz .mem { gap: 10px; }
+  #puz .mc { font-size: 34px; aspect-ratio: 1; border-radius: 14px; }
+  #puz .cards { gap: 10px; }
+  #puz .stepc { font-size: 17px; padding: 16px; border-radius: 14px; }
+  #puz .stepc.done { padding-left: 52px; }
+  #puz .stepc.done::before { width: 28px; height: 28px; left: 14px; }
+  #puz .seq { gap: 8px; }
+  #puz .sq { width: 46px; height: 56px; font-size: 28px; }
+  #puz .opts { max-width: none; gap: 10px; }
+  #puz .opt { font-size: 36px; padding: 16px 0; border-radius: 14px; }
+  #puz .muted { font-size: 15px; }
+  #puz .slots { gap: 8px; }
+  #puz .slot { height: 64px; font-size: 34px; }
+  #puz .keypad { max-width: 380px; gap: 10px; }
+  #puz .keypad button { padding: 0; height: 62px; font-size: 24px; border-radius: 14px; }
+  #puz .reveal b { font-size: 80px; }
+}
+@media (pointer: coarse) and (max-height: 520px) and (min-width: 601px) {
+  #puz .card { gap: 8px; }
+  #puz .pads { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 6px; }
+  #puz .pad { aspect-ratio: 1.6; }
+  #puz .cell { aspect-ratio: auto; height: 46px; font-size: 24px; }
+  #puz .grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  #puz .mem { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+  #puz .mc { aspect-ratio: auto; height: 56px; font-size: 26px; }
+  #puz .stepc { padding: 10px 14px; font-size: 15px; }
+  #puz .opt { padding: 8px 0; font-size: 28px; }
+  #puz .keypad { grid-template-columns: repeat(6, minmax(0, 1fr)); max-width: none; }
+  #puz .keypad button { height: 46px; font-size: 20px; }
+  #puz .slot { height: 50px; font-size: 28px; }
+  #puz .reveal b { font-size: 56px; }
+  #puz .pmsg { min-height: 1.6em; font-size: 16px; }
+}
+.metro { position: relative; aspect-ratio: 1.35; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 24px; }
+.metro svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.metro line { stroke: #3a4280; stroke-width: 5; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.metro line.on { stroke: var(--calm); stroke-width: 7; }
+.mn { position: absolute; transform: translate(-50%, -50%); width: 38px; height: 38px; border-radius: 50%; border: 3px solid var(--line); background: var(--panel); padding: 0; cursor: pointer; }
+.mn small { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; font: 700 11px var(--font-body); color: var(--muted); margin-top: 3px; pointer-events: none; }
+.mn.start { border-color: var(--calm); }
+.mn.end { border-color: var(--warm); background: #3a3320; }
+.mn.blocked { border-color: var(--alert); background: #4a2a35; }
+.mn.on { background: var(--calm); }
+.mn.hl { box-shadow: 0 0 0 5px rgba(242,194,48,.6); }
+.ttw { overflow-x: auto; }
+.tt { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tt th, .tt td { padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--line); }
+.tt th { color: var(--muted); font-weight: 800; font-size: 13px; }
+.tt tr.hl td { background: #33305a; }
+.q { margin: 0; font-weight: 800; font-size: 17px; }
+.opts4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.opts4 button { font: 800 20px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 14px 4px; cursor: pointer; }
+.opts4 button.no { background: #4a2a35; }
+.slide { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; max-width: 360px; margin: 0 auto; }
+.tile { aspect-ratio: 1; font: 600 34px var(--font-display); color: #fff; border: 0; border-radius: 12px; cursor: pointer; background: hsl(var(--h), 55%, 38%); }
+.tile.empty { background: var(--bg); cursor: default; }
+.tile.hl { outline: 4px solid var(--warm); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+.legend i { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #14182a; font-style: normal; font-weight: 800; margin-right: 4px; font-size: 12px; vertical-align: middle; }
+.field { position: relative; aspect-ratio: 1.4; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; }
+.bal { position: absolute; width: 11%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; display: grid; place-items: center; color: #14182a; font-weight: 800; font-size: 14px; }
+.bal.pulse { outline: 3px solid #fff; }
+.clues { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.srow { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+.st { flex: 0 0 96px; font-size: 14px; color: var(--muted); font-weight: 800; }
+.sb { flex: 1; min-width: 0; font: 700 16px var(--font-body); color: var(--ink); background: var(--bg); border: 1px dashed var(--line); border-radius: 10px; padding: 12px; cursor: pointer; text-align: left; }
+.sb.filled { border-style: solid; border-color: var(--calm); background: #17323a; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chip { font: 700 15px var(--font-body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 10px 14px; cursor: pointer; }
+.chip.sel { background: var(--calm); color: #0b1a18; border-color: var(--calm); }
+.chip.used { opacity: .5; }
+.wslots, .wpool { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; }
+.ls { flex: 1 1 0; min-width: 26px; max-width: 44px; height: 50px; font: 800 24px var(--font-body); color: var(--ink); background: var(--bg); border: 2px solid var(--line); border-radius: 10px; cursor: pointer; padding: 0; }
+.ls.fill { border-color: var(--calm); }
+.ls.no { background: #4a2a35; }
+.lt { flex: 1 1 0; min-width: 30px; max-width: 48px; height: 54px; font: 800 26px var(--font-body); color: #0b1a18; background: var(--calm); border: 0; border-radius: 10px; cursor: pointer; padding: 0; }
+.lt.used { opacity: .25; cursor: default; }
+@media (max-width: 600px), (pointer: coarse) and (max-height: 520px) {
+  #puz .mn { width: 48px; height: 48px; }
+  #puz .mn small { font-size: 12px; }
+  #puz .metro { margin-bottom: 28px; }
+  #puz .tt td, #puz .tt th { padding: 10px 6px; }
+  #puz .tt td { font-size: 17px; }
+  #puz .q { font-size: 18px; }
+  #puz .opts4 button { padding: 18px 4px; font-size: 22px; border-radius: 14px; touch-action: manipulation; }
+  #puz .tile { font-size: 40px; border-radius: 14px; }
+  #puz .slide { max-width: none; gap: 8px; }
+  #puz .sb { padding: 16px; font-size: 17px; }
+  #puz .chip { padding: 13px 16px; font-size: 16px; }
+  #puz .srow { margin-top: 10px; }
+  #puz .st { flex-basis: 90px; }
+  #puz .ls { height: 56px; font-size: 26px; }
+  #puz .lt { height: 60px; font-size: 28px; }
+  #puz .bal { font-size: 16px; }
+  #puz .clues { font-size: 16px; }
+}
+@media (pointer: coarse) and (max-height: 520px) and (min-width: 601px) {
+  #puz .metro { aspect-ratio: 2.6; margin-bottom: 20px; }
+  #puz .slide { max-width: 210px; }
+  #puz .field { aspect-ratio: 2.8; }
+  #puz .opts4 button { padding: 10px 4px; }
+  #puz .tt td, #puz .tt th { padding: 4px 6px; }
+}
+.clist { display: grid; gap: 6px; margin-bottom: 10px; }
+.crow { display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; font-variant-numeric: tabular-nums; }
+.crow b { letter-spacing: 4px; font-size: 18px; }
+.crow span { color: var(--muted); font-size: 14px; align-self: center; }
+.curd { display: flex; gap: 8px; justify-content: center; margin: 10px 0; }
+.curd i { width: 48px; height: 56px; display: grid; place-items: center; font: 800 26px var(--font-body); font-style: normal; border: 2px dashed var(--line); border-radius: 10px; }
+.curd i.f { border-style: solid; border-color: var(--calm); }
+.sgrid { display: grid; gap: 4px; max-width: 320px; margin: 0 auto 12px; }
+.sd { aspect-ratio: 1; font: 800 28px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; padding: 0; }
+.sd.given { background: #263262; cursor: default; }
+.sd.sel { outline: 3px solid var(--warm); }
+.sd.no { background: #4a2a35; }
+.sd.hl { box-shadow: 0 0 0 4px rgba(242,194,48,.7); }
+.sd.b { margin-right: 6px; } .sd.r { margin-bottom: 6px; }
+.lo { aspect-ratio: 1; border: 0; border-radius: 10px; background: #1b2140; cursor: pointer; padding: 0; }
+.lo.on { background: var(--warm); box-shadow: 0 0 14px rgba(242,194,48,.5); }
+.lo.hl { outline: 4px solid var(--calm); }
+.pegs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.peg { height: 190px; display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; padding: 8px 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; background-image: linear-gradient(#3a4280, #3a4280); background-repeat: no-repeat; background-size: 6px 85%; background-position: 50% 100%; }
+.peg.sel { outline: 3px solid var(--warm); }
+.peg.hl { outline: 3px solid var(--calm); }
+.disc { height: 22px; border-radius: 8px; background: hsl(var(--h), 55%, 50%); position: relative; }
+.banks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.bank { min-height: 150px; padding: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; gap: 8px; }
+.bank h3 { margin: 0; font-size: 13px; color: var(--muted); }
+.it { font: 800 16px var(--font-body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 8px; cursor: pointer; }
+.it.me { background: #17323a; border-color: var(--calm); cursor: default; }
+.it.hl { outline: 3px solid var(--warm); }
+.it.no { background: #4a2a35; }
+.opts9 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.opts9 button { font: 800 20px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 14px 0; cursor: pointer; }
+.opts9 button.used { opacity: .3; }
+@media (max-width: 600px), (pointer: coarse) and (max-height: 520px) {
+  #puz .sd { font-size: 30px; }
+  #puz .opts9 button { padding: 17px 0; font-size: 22px; touch-action: manipulation; }
+  #puz .it { padding: 16px 8px; font-size: 17px; }
+  #puz .crow b { font-size: 20px; }
+}
+@media (pointer: coarse) and (max-height: 520px) and (min-width: 601px) {
+  #puz .sgrid { max-width: 200px; }
+  #puz .peg { height: 120px; }
+  #puz .bank { min-height: 100px; }
+}
+@media (max-width: 480px) { h1 { font-size: 21px; } .card { padding: 16px; } }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Davi no Shopping</h1>
+    <p>Um adolescente autista nível 1 perdido no shopping. Ajude-o a chegar até a mãe.</p>
+  </header>
+
+  <div id="stage">
+    <canvas id="c" aria-label="Área do jogo"></canvas>
+
+    <div id="menu" class="overlay">
+      <div class="card">
+        <h2>Davi se perdeu</h2>
+        <p>O Davi tem 15 anos e é autista nível 1 de suporte: conversa, estuda e se vira bem no dia a dia, mas multidão, barulho e imprevistos pesam muito. Ele se separou da mãe num shopping lotado e o celular ficou sem bateria. A mãe espera no balcão de <b>Informações</b>, no canto superior direito.</p>
+        <p>Chegue lá cuidando da <b>sobrecarga sensorial</b> do Davi. Se a barra chegar ao máximo, ele precisa parar um pouco para se recuperar. Pedir ajuda a estranhos é difícil, principalmente quando as palavras travam.</p>
+        <p>O balcão fica atrás de um <b>portão com código de 6 números</b>. Cada número aparece num toten azul quando você resolve o desafio dele. Sem pressa: errar não tem punição, e resolver desafios acalma o Davi.</p>
+        <dl class="keys">
+          <dt>Setas / WASD</dt><dd>Andar (ou arraste o dedo/mouse na tela, ou use os botões abaixo)</dd>
+          <dt>H</dt><dd>Ligar ou desligar os fones (a bateria acaba)</dd>
+          <dt>Espaço</dt><dd>Respirar fundo (segure, parado)</dd>
+          <dt>Shift</dt><dd>Balançar as mãos, um stim que acalma (segure, anda mais devagar)</dd>
+          <dt>E</dt><dd>Falar com funcionário de colete amarelo, resolver desafios nos totens azuis e digitar o código no portão</dd>
+        </dl>
+        <p class="muted">Os cantinhos azuis são lugares quietos para se recuperar. Cada pessoa autista é diferente: este jogo mostra só uma situação possível.</p>
+        <p class="muted" id="menuTip"></p>
+        <div class="row" id="contRow" hidden><button class="btn" id="contBtn" type="button">Continuar</button><button class="btn ghost sm" id="clrBtn" type="button">Apagar progresso</button></div>
+        <button class="btn" id="startBtn" type="button">Começar</button>
+        <div class="lvlsel"><span class="muted">Ou vá direto para uma fase:</span><div class="row" id="lvlSel"></div></div>
+      </div>
+    </div>
+
+    <div id="end" class="overlay" hidden>
+      <div class="card">
+        <h2 id="endTitle">Davi encontrou a mãe</h2>
+        <p id="endText"></p>
+        <div class="stats">
+          <div class="stat"><b id="sTime">0:00</b><span>tempo</span></div>
+          <div class="stat"><b id="sShut">0</b><span>sobrecargas totais</span></div>
+          <div class="stat"><b id="sHelp">0</b><span>pedidos de ajuda</span></div>
+          <div class="stat"><b id="sPuz">0/6</b><span>desafios resolvidos</span></div>
+        </div>
+        <p class="muted">Fones, respiração, pausas e stims são formas legítimas de autorregulação. Na vida real, lugares com menos barulho e pessoas que ajudam com calma fazem muita diferença.</p>
+        <p class="muted" id="endTip"></p>
+        <div class="row"><button class="btn" id="nextBtn" type="button">Próxima fase</button><button class="btn ghost" id="againBtn" type="button">Repetir fase</button></div>
+      </div>
+    </div>
+    <div id="intro" class="overlay" hidden>
+      <div class="card">
+        <p class="muted" id="inLv"></p>
+        <h2 id="inTitle"></h2>
+        <p id="inStory"></p>
+        <p class="muted" id="inTip"></p>
+        <button class="btn" id="inGo" type="button">Começar fase</button>
+      </div>
+    </div>
+
+    <div id="puz" class="overlay" hidden>
+      <div class="card puz">
+        <div class="puzhead"><h2 id="puzTitle"></h2><button class="btn ghost sm" id="puzClose" type="button">Fechar</button></div>
+        <p class="muted" id="puzIntro"></p>
+        <div id="puzBody"></div>
+        <p id="puzMsg" class="pmsg" role="status" aria-live="polite"></p>
+        <div class="row" id="puzActions"><button class="btn ghost sm" id="puzHint" type="button">Dica</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <label for="optDiff">Dificuldade <select id="optDiff"><option value="calmo">Calmo</option><option value="normal" selected>Normal</option><option value="desafio">Desafio</option></select></label>
+    <label for="optSound"><input type="checkbox" id="optSound" checked> Som ambiente</label>
+    <button class="btn ghost sm" id="saveBtn" type="button">Salvar e ir ao menu</button>
+    <label for="optCalm"><input type="checkbox" id="optCalm"> Reduzir efeitos visuais (sem tremor nem piscadas)</label>
+  </div>
+
+  <div class="touch" id="touch">
+    <div class="dpad">
+      <button class="tb" data-code="ArrowUp" aria-label="Cima">▲</button>
+      <button class="tb" data-code="ArrowLeft" aria-label="Esquerda">◀</button>
+      <button class="tb" data-code="ArrowRight" aria-label="Direita">▶</button>
+      <button class="tb" data-code="ArrowDown" aria-label="Baixo">▼</button>
+    </div>
+    <div class="acts">
+      <button class="tb" data-code="KeyH">Fones</button>
+      <button class="tb" data-code="KeyE">Pedir ajuda</button>
+      <button class="tb" data-code="Space">Respirar</button>
+      <button class="tb" data-code="ShiftLeft">Stim</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const T = 48;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const stage = document.getElementById('stage');
+const $ = id => document.getElementById(id);
+
+/* ---------- Fases ---------- */
+const LEVELS = [
+  {
+    name: 'Shopping',
+    story: 'O Davi se separou da mãe num shopping lotado e o celular ficou sem bateria. Ela espera no balcão de Informações.',
+    tip: 'Os alto-falantes e os letreiros piscando são os piores pontos.',
+    W: 34, H: 24, floor: ['#e3e6ee', '#d9dde8'], wall: '#2b3050',
+    goalName: 'balcão de Informações', art: 'o', prep: 'ao', dir: 'lá em cima, à direita',
+    blocks: [
+      [2,2,6,4,'Roupas','#7d62ad'],[9,2,5,4,'Brinquedos','#d4793f'],[15,2,4,4,'Livros','#3f8a78'],[20,2,6,4,'Cinema','#b0415a'],[27,2,5,4,'Sorvetes','#d99d2f'],
+      [2,8,4,5,'Games','#3f6fb5'],[7,8,5,4,'Tênis','#c25a3a'],[13,8,4,5,'Café','#8a6a48'],[18,8,6,4,'Eletrônicos','#4b5a8f'],[26,8,6,5,'Farmácia','#3d9a6c'],
+      [2,15,5,5,'Mercado','#5e8f3f'],[8,15,4,4,'Pet Shop','#b5703f'],[13,15,6,5,'Academia','#6a5fb0'],[20,15,4,5,'Joias','#a64a8a'],[26,15,6,4,'Livraria','#4a7f9c']
+    ],
+    speakers: [[8.5,6.5],[25,13.5],[13,21.5],[31.5,6.5],[14,1.5]],
+    lights: [[19.5,6.5],[12.5,13.5],[6,21.5],[24,21.5],[2.5,6.5]],
+    quiets: [[6.5,10.5],[12.5,10.5],[17.5,10.5],[25,10.5],[7.5,17.5],[19.5,17.5],[32.5,12.5]],
+    helpers: [[7.5,20.5,'Marta'],[17.5,13.5,'Rafa'],[26.5,1.5,'Seu Jorge']],
+    batteries: [[1.5,14.5],[19.5,13.5],[32.5,18.5]],
+    totens: [[1.5,17.5,'luzes'],[9.5,13.5,'cofre'],[22.5,6.5,'roteiro'],[17.5,20.5,'sudoku'],[29.5,13.5,'sequencia'],[5.5,6.5,'travessia']],
+    gates: [[27,1],[32,5]], goalPos: [31.5,1.5], start: [1.5,22.5],
+    pocket: [[28,1,32,1],[32,2,32,4]],
+    desk: { x: 29, y: 0, w: 4, h: 1, label: 'INFORMAÇÕES' },
+    events: [], npcs: 16, kids: 0
+  },
+  {
+    name: 'Estação Central',
+    story: 'As portas do metrô fecharam entre o Davi e a mãe. Ela avisou que vai esperar na Saída B, mas o celular do Davi morreu. Os trens passam de tempos em tempos e o barulho perto dos trilhos é enorme.',
+    tip: 'Quando o aviso de trem aparecer, ligue os fones ou se afaste dos trilhos.',
+    W: 36, H: 19, floor: ['#dcdfe6', '#d2d6e0'], wall: '#2b3050',
+    goalName: 'Saída B', art: 'a', prep: 'à', dir: 'no canto superior direito, depois da catraca',
+    blocks: [
+      [2,3,5,2,'Lanches','#d4793f'],[8,3,5,2,'Bilhetes','#3f6fb5'],[14,3,5,2,'Jornais','#8a6a48'],[20,3,4,2,'Banca','#b0415a'],[25,3,3,2,'Café','#7d62ad'],[29,3,6,2,'Área reservada','#4b5a8f'],
+      [2,7,32,4,'Trilhos','#3a3f55','tracks'],
+      [3,13,5,2,'Banheiros','#4a7f9c'],[9,13,5,2,'Lojas','#a64a8a'],[15,13,6,2,'Mercadinho','#5e8f3f'],[22,13,5,2,'Lanchonete','#d99d2f'],[28,13,6,2,'Bicicletário','#6a5fb0']
+    ],
+    speakers: [[10,2],[26,2],[18,5.5],[8,11.5],[26,11.5],[17,16]],
+    lights: [[4,5.5],[20,5.5],[31,5.5],[12,11.5],[30,11.5]],
+    quiets: [[7.5,3.5],[13.5,3.5],[19.5,3.5],[24.5,3.5],[8.5,13.5],[21.5,13.5],[27.5,13.5],[1.5,9]],
+    helpers: [[3.5,16.5,'Dona Célia'],[14,5.5,'Bruno'],[30.5,1.5,'Seu Zé']],
+    batteries: [[1.5,6],[34.5,9],[17.5,16.5]],
+    totens: [[1.5,12.5,'apagar'],[11,5.5,'rota'],[17.5,11.5,'roteiro'],[30.5,16.5,'horario'],[22,5.5,'torre'],[12.5,16.5,'magico']],
+    gates: [[32,1],[32,2]], goalPos: [34,1.5], start: [1.5,17.5],
+    pocket: [[33,1,34,2]],
+    desk: { x: 31, y: 0, w: 4, h: 1, label: 'SAÍDA B' },
+    events: [{ rect: [2,7,32,4], period: 22, dur: 6, off: 6, rate: 22, R: 3.5, label: 'TREM PASSANDO', warn: 'Trem chegando! Ligue os fones ou fique longe dos trilhos.' }],
+    npcs: 18, kids: 0
+  },
+  {
+    name: 'Festa no Parque',
+    story: 'Na festa do bairro, o Davi se afastou da mãe para olhar o lago. Agora tem show no palco, crianças correndo e luzes de festa por todo lado. A mãe espera no posto de Achados e Perdidos.',
+    tip: 'Embaixo das árvores há cantinhos calmos. Quando o show começa, o barulho vem de todo lado.',
+    W: 38, H: 22, floor: ['#cfe6bf', '#c6dfb5'], wall: '#3f6b34',
+    goalName: 'posto de Achados e Perdidos', art: 'o', prep: 'ao', dir: 'no canto inferior direito do parque',
+    blocks: [
+      [3,2,8,4,'Palco','#8a4f9c'],
+      [14,2,3,2,'Pastel','#d4793f'],[18,2,3,2,'Milho','#d99d2f'],[22,2,3,2,'Doces','#b0415a'],[26,2,3,2,'Artesanato','#3f8a78'],
+      [14,8,10,5,'Lago','#5aa7d9','lake'],
+      [3,9,3,3,'Árvores','#3f7a3a','trees'],[3,14,3,3,'Árvores','#3f7a3a','trees'],[31,2,4,3,'Árvores','#3f7a3a','trees'],
+      [28,9,5,4,'Parquinho','#d9823a'],
+      [8,16,4,2,'Food truck','#c25a3a'],[14,16,4,2,'Food truck','#3f6fb5'],[20,16,4,2,'Food truck','#5e8f3f'],[26,16,4,2,'Food truck','#a64a8a'],
+      [35,18,2,1,'Cerca','#8a6a48']
+    ],
+    speakers: [[11.5,3,7,20],[11.5,6.5,7,20],[30.5,7.5],[19,19.5],[34,13]],
+    lights: [[15.5,4.5],[23.5,4.5],[11,12.5],[26,14.5],[33,16]],
+    quiets: [[6.5,10.5],[6.5,15.5],[13.5,10.5],[24.5,10.5],[33.5,6.5],[19.5,13.5]],
+    helpers: [[1.5,12.5,'Lúcia'],[20,6.5,'Tiago'],[32.5,19.5,'Seu Raul']],
+    batteries: [[1.5,5.5],[25.5,6.5],[12.5,19.5]],
+    totens: [[8.5,7.5,'contar'],[13.5,14.5,'torre'],[30,5.5,'quebra'],[21.5,19.5,'sudoku'],[33.5,14.5,'sons'],[26.5,6.5,'apagar']],
+    gates: [[34,19],[34,20]], goalPos: [36,20], start: [1.5,20.5],
+    pocket: [[35,19,36,20]],
+    desk: { x: 34, y: 21, w: 4, h: 1, label: 'ACHADOS E PERDIDOS' },
+    events: [{ period: 32, dur: 5, off: 8, rate: 13, label: 'SHOW NO PALCO', warn: 'O show vai começar no palco! Vai ficar bem alto.' }],
+    npcs: 20, kids: 7
+  },
+  {
+    name: 'Recreio na Escola',
+    story: 'É o primeiro dia do Davi na escola nova. O recreio começou, o pátio lotou e ele não achou o caminho da secretaria, onde a mãe espera. O sinal toca de repente e é muito alto.',
+    tip: 'O sinal do recreio toca de surpresa. Com os fones ligados, o susto é bem menor.',
+    W: 34, H: 22, floor: ['#e8e2d2', '#dfd8c6'], wall: '#2b3050',
+    goalName: 'secretaria', art: 'a', prep: 'à', dir: 'no canto superior direito, perto da biblioteca',
+    blocks: [
+      [2,1,5,3,'Sala 1','#7d62ad'],[8,1,5,3,'Sala 2','#3f6fb5'],[14,1,5,3,'Sala 3','#3f8a78'],[20,1,3,3,'Laboratório','#b0415a'],[24,1,5,3,'Biblioteca','#8a6a48'],[30,3,3,1,'Secretaria','#4b5a8f'],
+      [5,7,4,3,'Jardim','#5e8f3f','trees'],[13,8,6,2,'Cantina','#d99d2f'],[23,7,4,4,'Quadra','#c25a3a'],
+      [2,16,5,3,'Sala 5','#a64a8a'],[8,16,5,3,'Sala 6','#4a7f9c'],[14,16,5,3,'Sala 7','#5e8f3f'],[20,16,5,3,'Música','#6a5fb0'],[26,16,6,3,'Ginásio','#c25a3a']
+    ],
+    speakers: [[11,6.5],[20.5,12.5],[29,14.5],[4,19.5],[16,4.5]],
+    lights: [[10,4.5],[22,14.5],[16,19.5],[28,4.5],[3,14.5]],
+    quiets: [[7.5,2.5],[19.5,2.5],[13.5,17.5],[25.5,17.5],[1.5,10.5],[32.5,12.5]],
+    helpers: [[10.5,5.5,'Profª Ana'],[21.5,14.5,'Prof. Marcos'],[29.5,4.5,'Dona Rita']],
+    batteries: [[1.5,6.5],[31.5,10.5],[16.5,14.5]],
+    totens: [[4.5,5.5,'cofre'],[11.5,11.5,'travessia'],[21.5,5.5,'grade'],[30.5,13.5,'palavra'],[10.5,19.5,'magico'],[16.5,12.5,'roteiro']],
+    gates: [[30,1],[30,2]], goalPos: [32,1.5], start: [1.5,20.5],
+    pocket: [[31,1,32,2]],
+    desk: { x: 30, y: 0, w: 4, h: 1, label: 'SECRETARIA' },
+    events: [{ period: 28, dur: 3, off: 12, rate: 24, label: 'SINAL DO RECREIO', warn: 'O sinal do recreio vai tocar! Tape os ouvidos ou ligue os fones.' }],
+    npcs: 24, kids: 8
+  }
+];
+let LV = 0, L = LEVELS[0];
+let W = 34, H = 24, grid = [], blocks = [], speakers = [], lights = [], quiets = [], helperPos = [], batteryPos = [], totens = [], gatePos = [];
+let goal = { x: 0, y: 0 }, START = { x: 0, y: 0 }, NP = 0;
+const px2 = a => a.map(([x, y]) => ({ x: x * T, y: y * T }));
+function loadLevel(i) {
+  LV = i; L = LEVELS[i]; W = L.W; H = L.H;
+  grid = Array.from({ length: H }, () => new Uint8Array(W));
+  for (let x = 0; x < W; x++) { grid[0][x] = 1; grid[H - 1][x] = 1; }
+  for (let y = 0; y < H; y++) { grid[y][0] = 1; grid[y][W - 1] = 1; }
+  blocks = L.blocks;
+  blocks.forEach(([x, y, w, h]) => { for (let j = y; j < y + h; j++) for (let k = x; k < x + w; k++) grid[j][k] = 2; });
+  speakers = L.speakers.map(([x, y, R, rate]) => ({ x: x * T, y: y * T, R, rate }));
+  lights = px2(L.lights).map((l, k) => ({ ...l, ph: k * 0.27 }));
+  quiets = px2(L.quiets);
+  helperPos = L.helpers.map(([x, y, name]) => ({ x: x * T, y: y * T, name }));
+  batteryPos = px2(L.batteries);
+  totens = L.totens.map(([x, y, id]) => ({ x: x * T, y: y * T, id }));
+  gatePos = L.gates; goal = { x: L.goalPos[0] * T, y: L.goalPos[1] * T }; START = { x: L.start[0] * T, y: L.start[1] * T };
+  NP = totens.length;
+}
+const inPocket = (x, y) => L.pocket.some(([x0, y0, x1, y1]) => x >= x0 && x <= x1 && y >= y0 && y <= y1);
+const gateCenter = g => ({ x: (g[0] + .5) * T, y: (g[1] + .5) * T });
+function evState(ev, t) {
+  const tt = t + (ev.off || 0), ph = tt % ev.period;
+  const active = ph >= ev.period - ev.dur, warn = !active && ph >= ev.period - ev.dur - 3;
+  return { active, warn, cycle: Math.floor(tt / ev.period), prog: active ? (ph - (ev.period - ev.dur)) / ev.dur : 0 };
+}
+const distRect = (p, r) => Math.hypot(Math.max(r[0] * T - p.x, 0, p.x - (r[0] + r[2]) * T), Math.max(r[1] * T - p.y, 0, p.y - (r[1] + r[3]) * T));
+
+const solid = (x, y) => { const tx = Math.floor(x / T), ty = Math.floor(y / T); return tx < 0 || ty < 0 || tx >= W || ty >= H || grid[ty][tx] !== 0; };
+const solidC = (x, y, r) => solid(x - r, y - r) || solid(x + r, y - r) || solid(x - r, y + r) || solid(x + r, y + r);
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ---------- Frases ---------- */
+const PHR = {
+  barulho: ['O som entra por todo lado. Preciso de um lugar quieto.', 'Esse barulho não para. Meus ouvidos estão cansados.', 'Não consigo separar as vozes. É tudo ao mesmo tempo.', 'Se eu ligar os fones, o barulho diminui.', 'Tanto som misturado me deixa sem pensar direito.'],
+  luz: ['Essa luz piscando me incomoda. Vou desviar o olhar.', 'Os letreiros piscam rápido demais. Fico tonto.', 'Prefiro andar por onde nada pisca.', 'A luz fere os olhos. Melhor passar rápido.'],
+  multidao: ['Tem gente demais por perto. Não gosto de ser tocado.', 'Muita gente se mexendo ao mesmo tempo. Vou procurar um caminho mais vazio.', 'Se eu esperar eles passarem, fica mais fácil andar.', 'Não sei para onde cada um vai. Isso me cansa.'],
+  tenso: ['Meu peito está apertado. Preciso respirar fundo.', 'Estou chegando no limite. Hora de usar o que me ajuda.', 'Posso balançar as mãos um pouco. Isso me acalma.', 'Tudo está ficando intenso demais. Uma pausa ajudaria.'],
+  calmo: ['Estou bem agora. Um passo de cada vez.', 'Já sei: procuro os totens e depois {o_goal}.', 'Minha mãe deve estar preocupada. Vou chegar até ela.', 'Eu consigo. Já resolvi coisas mais difíceis que isso.'],
+  quieto: ['Aqui está bem mais calmo. Posso respirar.', 'Um cantinho quieto. Vou ficar um pouco.', 'Silêncio, finalmente. Meu corpo desacelera.', 'Aqui ninguém me empurra. Que alívio.'],
+  bateria: ['A bateria dos fones está acabando. Preciso achar uma bateria verde.', 'Os fones vão desligar logo. Cadê aquelas baterias?'],
+  fones_on: ['Fones ligados. Os sons ficam bem mais baixos.', 'Fones ligados. Parece que alguém abaixou o volume do mundo.', 'Fones ligados. Agora dá para pensar.'],
+  fones_off: ['Fones desligados.', 'Fones desligados. Vou poupar a bateria.'],
+  bateria_ok: ['Bateria nova para os fones.', 'Achei uma bateria! Os fones duram mais.', 'Mais bateria. Respirei aliviado.'],
+  esbarrao: ['Esbarraram no Davi! “Opa, desculpa!”', 'Alguém passou raspando e o Davi levou um susto.', 'Um toque inesperado. O coração do Davi disparou.', '“Sai da frente!” Alguém passou apressado.'],
+  crise: ['Sobrecarga total. O Davi precisa parar e se recuperar.', 'Tudo ficou demais. O Davi fecha os olhos e espera passar.', 'Sobrecarga total. Ele se agacha e tapa os ouvidos até passar.'],
+  recupera: ['O Davi está um pouco melhor. Siga com calma.', 'O barulho voltou a ficar suportável. Respire e siga.', 'Passou. O Davi respira fundo e continua.'],
+  davi_fala: ['Você respira, junta coragem e fala, com o cartão na mão: “Estou perdido e meu celular descarregou. Pode falar devagar e baixo?”', 'Você mostra o cartão e diz, olhando para o colete: “Desculpa incomodar. Preciso chegar {ao_goal}.”', 'Você segura o cartão e repete a frase que ensaiou: “Oi. Estou perdido. Minha mãe me espera.”'],
+  davi_trava: ['As palavras não saem, então você entrega o cartão que escreveu.', 'Sua voz some. Você só consegue estender o cartão: “Estou perdido. Preciso de ajuda.”', 'Está alto demais para falar. Você aponta para a mensagem escrita no cartão.'],
+  ajuda0: ['— {h}: Claro, meu bem, sem pressa. {O_goal} fica {dir}, atrás de um portão com código de {n} números. Os totens azuis mostram os números.', '— {h}: Fica tranquilo, eu falo baixinho. {O_goal} fica {dir}. O portão tem um código de {n} números, que você descobre nos totens azuis.'],
+  ajuda1: ['— {h}: Tranquilo! {O_goal} fica {dir}. Tem um portão com código de {n} números. Cada toten azul dá um número.', '— {h}: Beleza, sem pressa. {O_goal} é {dir}. O portão pede {n} números, e os totens azuis entregam um por um.'],
+  ajuda2: ['— {h}: Respire, estou aqui. {O_goal} fica {dir}. O portão abre com um código de {n} números dos totens azuis.', '— {h}: Pode ficar o tempo que precisar. {O_goal} é logo ali. Para passar pelo portão, junte os {n} números dos totens azuis.'],
+  repete: ['— {O_goal} fica {dir}, atrás do portão com código. Os totens azuis têm os números.', '— Sem pressa. Os números do portão estão nos totens azuis. Eu aponto o caminho.', '— Continue em frente, você está indo bem. Eu aponto a direção.'],
+  acertou: ['Isso!', 'Certo!', 'Muito bem!', 'Isso mesmo.', 'Boa!'],
+  errou: ['Esse é igual aos outros. Olhe com calma.', 'Ainda não. Sem pressa, tente outro.', 'Quase! Dê mais uma olhada.', 'Não é esse. Respire e procure de novo.'],
+  errou_luz: ['Quase. Vou mostrar de novo, sem pressa.', 'Não foi dessa vez. Veja de novo com calma.', 'Tudo bem errar. Observe outra vez.'],
+  par: ['Par encontrado!', 'Esses dois combinam!', 'Achou um par!'],
+  par_no: ['Não foi dessa vez. Memorize onde cada um está.', 'Quase! Guarde a posição dessas cartas.', 'Sem problema. Tente de novo.'],
+  venceu: ['Desafio resolvido! O número foi anotado.', 'Conseguiu! Número anotado.', 'Mandou bem! O número entrou no seu código.'],
+  codigo_errado: ['Código errado. Confira os números dos totens azuis.', 'Não abriu. Veja se anotou todos os números certinhos.', 'Esse código não funciona. Tente de novo com calma.'],
+  portao: ['Portão aberto! {O_goal} está logo ali.', 'Clique! O portão abriu. A mãe do Davi está logo ali.', 'Funcionou! O caminho até {o_goal} está livre.'],
+  inicio: ['O celular morreu e o shopping está barulhento. Procure {o_goal}.', 'Davi olha em volta: nenhum rosto conhecido e o celular sem bateria. Procure {o_goal}.', 'Tudo é muito alto e muito rápido. Davi respira e procura {o_goal}.'],
+  inicio1: ['O trem foi embora com a mãe do Davi dentro. Procure {o_goal}.', 'A estação inteira ecoa. Davi respira e procura {o_goal}.', 'Sem celular e com a estação lotada, Davi procura as placas de {goal}.'],
+  inicio2: ['Música alta, gente correndo e o lago ficou para trás. Procure {o_goal}.', 'O parque está em festa e a mãe sumiu de vista. Procure {o_goal}.', 'Davi respira fundo no meio da festa e procura {o_goal}.'],
+  inicio3: ['O sinal tocou e o corredor lotou. Procure {o_goal}.', 'Primeiro dia na escola nova. Davi respira e procura {o_goal}.', 'Tantos alunos ao mesmo tempo! Davi procura {o_goal}.'],
+  mae: ['Mãe: “Meu amor, eu estava tão preocupada. Você foi muito corajoso.”', 'Mãe: “Estou aqui. Vamos para um lugar quieto?”', 'Mãe: “Obrigada por pedir ajuda. Estou orgulhosa de você.”', 'Mãe: “Respira. Já passou. Vamos para casa com calma.”'],
+  anuncio: ['ANÚNCIO: “Atenção! Promoção relâmpago no segundo piso!”', 'ANÚNCIO: “A loja de brinquedos fecha em 15 minutos.”', 'ANÚNCIO: “Criança perdida? Procure o balcão de Informações.”', 'ANÚNCIO: “Sorvete em dobro até as 20 horas!”', 'ANÚNCIO: “Atenção, cliente: seu carro está com os faróis acesos.”'],
+  anuncio1: ['ANÚNCIO: “Mantenha-se atrás da faixa amarela.”', 'ANÚNCIO: “Trem com destino ao Centro na plataforma 2.”', 'ANÚNCIO: “Objetos esquecidos podem ser retirados na Saída B.”', 'ANÚNCIO: “Atenção: desembarque pelo lado esquerdo.”'],
+  anuncio2: ['ANÚNCIO: “O show de forró começa em 5 minutos no palco!”', 'ANÚNCIO: “Sorteio de brindes às 16 horas!”', 'ANÚNCIO: “Pais de criança perdida: procurem o posto de Achados e Perdidos.”', 'ANÚNCIO: “Pastel em dobro na barraca azul!”'],
+  anuncio3: ['AVISO: “Alunos do 9º ano, sala 3 depois do recreio.”', 'AVISO: “Lanche especial na cantina hoje!”', 'AVISO: “Reunião de pais na secretaria às 18 horas.”', 'AVISO: “Quem achou um caderno azul? Entregue na secretaria.”'],
+  conversa: ['Mãe, quero sorvete!', 'Chegamos atrasados...', 'Olha essa promoção!', 'Cadê o Pedro?', 'Vamos ao cinema?', 'Que fome!', 'Fala mais alto!', 'Me espera!'],
+  conversa1: ['Vai perder o trem!', 'Licença, por favor.', 'Qual plataforma é?', 'Cadê meu bilhete?', 'Estou atrasado!', 'Segura a porta!'],
+  conversa2: ['Quero algodão-doce!', 'Vem ver o show!', 'Olha o lago!', 'Corre, corre!', 'Mãe, posso brincar?', 'Que música boa!'],
+  conversa3: ['Bora pra cantina!', 'Fez a lição?', 'Me empresta o caderno?', 'Recreio, enfim!', 'Quem vai jogar bola?', 'Você é novo aqui?'],
+  dica: ['Os cantinhos azuis acalmam o Davi mais rápido.', 'Fones e respiração funcionam juntos.', 'Resolver um puzzle também acalma.', 'O funcionário de colete amarelo mostra o caminho.', 'Se a bateria dos fones acabar, procure as baterias verdes.', 'Esbarrões assustam: espere a multidão passar.', 'Na dúvida, respire. Sem pressa.', 'Cada fase tem um tipo de barulho diferente.']
+};
+const lastPick = {};
+function fmt(t, hi) {
+  const og = L.art + ' ' + L.goalName, aog = L.prep + ' ' + L.goalName;
+  return t.replace(/\{O_goal\}/g, og.charAt(0).toUpperCase() + og.slice(1)).replace(/\{o_goal\}/g, og).replace(/\{ao_goal\}/g, aog)
+    .replace(/\{goal\}/g, L.goalName).replace(/\{dir\}/g, L.dir).replace(/\{n\}/g, String(NP)).replace(/\{h\}/g, (L.helpers[hi || 0] || [0, 0, ''])[2]);
+}
+function rnd(k, hi) {
+  const key = (LV > 0 && PHR[k + LV]) ? k + LV : k, a = PHR[key]; let i;
+  do { i = Math.floor(Math.random() * a.length); } while (a.length > 1 && i === lastPick[key]);
+  lastPick[key] = i; return fmt(a[i], hi);
+}
+
+/* ---------- Estado ---------- */
+let S;
+let soundOn = true, calmFx = false;
+const DIFFS = {
+  calmo:   { nz: 1,    base: 0.6, rec: 1,    drain: 1.4, after: 45, help: 35, hint: 14, pz: 20, npc: 1,    lens: [4, 5],    placas: 3, pares: 6, rota: 2, hor: 2, quebra: 18, contar: 2, grade: 3, palavra: 2, cofre: [3, 6], sudoku: 6, apagar: [3, 4], magico: 4, torre: 3, periods: [2, 3, 4],    sons: [0, 1, 2, 4, 6] },
+  normal:  { nz: 1.25, base: 0.9, rec: 0.85, drain: 1.9, after: 55, help: 28, hint: 10, pz: 15, npc: 1.25, lens: [4, 5, 6], placas: 4, pares: 8, rota: 3, hor: 3, quebra: 40, contar: 3, grade: 4, palavra: 3, cofre: [4, 7], sudoku: 8, apagar: [4, 6], magico: 5, torre: 4, periods: [2, 3, 4, 5], sons: [0, 1, 2, 4, 5, 6] },
+  desafio: { nz: 1.5,  base: 1.2, rec: 0.7,  drain: 2.4, after: 65, help: 20, hint: 6,  pz: 10, npc: 1.5,  lens: [5, 6, 7], placas: 5, pares: 10, rota: 4, hor: 4, quebra: 80, contar: 4, grade: 5, palavra: 4, cofre: [4, 9], sudoku: 10, apagar: [5, 8], magico: 6, torre: 5, periods: [3, 4, 5, 6], sons: [0, 1, 2, 3, 4, 5, 6] }
+};
+let D = DIFFS.normal;
+try { const sv = localStorage.getItem('davi-diff'); if (sv && DIFFS[sv]) { D = DIFFS[sv]; $('optDiff').value = sv; } } catch (_) {}
+if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { calmFx = true; $('optCalm').checked = true; }
+
+function randFloor() {
+  for (;;) {
+    const x = 1 + Math.floor(Math.random() * (W - 2)), y = 1 + Math.floor(Math.random() * (H - 2));
+    if (grid[y][x] === 0 && !inPocket(x, y)) { const p = { x: (x + .5) * T, y: (y + .5) * T }; if (dist(p, START) > 5 * T) return p; }
+  }
+}
+const SKIN = ['#e7b48f', '#c98d63', '#8d5a3b', '#f1caa6'];
+const SHIRT = ['#6b7fb3', '#b3646b', '#7aa66b', '#c9a45a', '#8f6bb3', '#5f9aa8'];
+function reset(state) {
+  gatePos.forEach(g => { grid[g[1]][g[0]] = 3; });
+  S = {
+    state: state || 'menu', t: 0, time: 0,
+    p: { x: START.x, y: START.y }, moving: false,
+    stress: 8, hpOn: false, battery: 100, shutdown: 0, shutCount: 0, helps: 0,
+    hint: 0, msgs: [], msgT: 0, bumpCd: 0, shake: 0, flash: 0, nzRaw: 0, quietNow: false,
+    npcs: Array.from({ length: Math.round(L.npcs * D.npc) }, (_, i) => { const p = randFloor(), kid = i < L.kids; return { x: p.x, y: p.y, a: Math.random() * 6.28, tt: Math.random() * 3, kid, sp: kid ? 70 + Math.random() * 40 : 30 + Math.random() * 30, skin: SKIN[Math.floor(Math.random() * 4)], shirt: SHIRT[Math.floor(Math.random() * 6)] }; }),
+    helpers: helperPos.map((h, i) => ({ ...h, i, used: false })),
+    batteries: batteryPos.map(b => ({ ...b, got: false })),
+    quietToast: false, thinkCd: 8, annCd: 12, ann: null, evWarn: {},
+    code: Array.from({ length: NP }, () => 1 + Math.floor(Math.random() * 9)), digits: Array(NP).fill(null), solved: Array(NP).fill(false)
+  };
+}
+function setMsg(lines, secs) { S.msgs = Array.isArray(lines) ? lines : [lines]; S.msgT = secs || 3; }
+function think(cat, force) {
+  if (!force && (S.thinkCd > 0 || S.msgT > 0)) return;
+  setMsg('Davi pensa: “' + rnd(cat) + '”', 4.5); S.thinkCd = 12;
+}
+
+/* ---------- Entrada ---------- */
+const keys = {};
+const GAME_CODES = new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','Space','ShiftLeft','ShiftRight','KeyH','KeyE']);
+function press(code) { if (!keys[code]) { keys[code] = true; if (S.state === 'play') { if (code === 'KeyH') toggleHp(); else if (code === 'KeyE') interact(); } } }
+function release(code) { keys[code] = false; }
+addEventListener('keydown', e => {
+  if (!GAME_CODES.has(e.code)) return;
+  const tag = e.target && e.target.tagName;
+  if (tag === 'INPUT' || tag === 'BUTTON') { if (e.code !== 'KeyH' && e.code !== 'KeyE' && !e.code.startsWith('Arrow') && !e.code.startsWith('Key')) return; }
+  if (S.state === 'play') e.preventDefault();
+  press(e.code);
+});
+addEventListener('keyup', e => { if (GAME_CODES.has(e.code)) release(e.code); });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+document.querySelectorAll('.tb[data-code]').forEach(b => {
+  const code = b.dataset.code;
+  b.addEventListener('pointerdown', e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} b.classList.add('on'); press(code); });
+  const off = () => { b.classList.remove('on'); release(code); };
+  b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
+  b.addEventListener('contextmenu', e => e.preventDefault());
+});
+/* Arrastar na tela do jogo para andar (dedo ou mouse) */
+const joy = { x: 0, y: 0, id: null, ox: 0, oy: 0 };
+canvas.addEventListener('pointerdown', e => {
+  canvas.focus({ preventScroll: true });
+  if (S.state !== 'play') return;
+  joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.x = 0; joy.y = 0;
+  try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+});
+canvas.addEventListener('pointermove', e => {
+  if (e.pointerId !== joy.id) return;
+  const vx = e.clientX - joy.ox, vy = e.clientY - joy.oy, l = Math.hypot(vx, vy);
+  if (l > 14) { joy.x = vx / l; joy.y = vy / l; } else { joy.x = 0; joy.y = 0; }
+});
+const joyEnd = e => { if (e.pointerId === joy.id) { joy.id = null; joy.x = 0; joy.y = 0; } };
+canvas.addEventListener('pointerup', joyEnd); canvas.addEventListener('pointercancel', joyEnd);
+canvas.tabIndex = 0;
+$('optSound').addEventListener('change', e => { soundOn = e.target.checked; });
+$('optDiff').addEventListener('change', e => { D = DIFFS[e.target.value] || DIFFS.normal; try { localStorage.setItem('davi-diff', e.target.value); } catch (_) {} });
+$('optCalm').addEventListener('change', e => { calmFx = e.target.checked; });
+
+/* ---------- Ações ---------- */
+function toggleHp() {
+  if (S.hpOn) { S.hpOn = false; setMsg(rnd('fones_off'), 2); return; }
+  if (S.battery <= 0) { setMsg('Sem bateria. Procure uma bateria verde pelo shopping.', 2.5); return; }
+  S.hpOn = true; setMsg(rnd('fones_on'), 2.4);
+}
+function interact() {
+  if (S.shutdown > 0) return;
+  let best = null, bd = 1e9;
+  S.helpers.forEach(h => { const d = dist(S.p, h); if (d < bd) { bd = d; best = h; } });
+  const ti = totens.findIndex(t => dist(S.p, t) < 1.5 * T);
+  const gi = gatePos.some(g => grid[g[1]][g[0]] === 3 && dist(S.p, gateCenter(g)) < 1.6 * T);
+  const helperReady = best && bd < 1.7 * T && !best.used;
+  if (!helperReady && ti >= 0) { openTotem(ti); return; }
+  if (!helperReady && gi) { openCode(); return; }
+  if (best && bd < 1.7 * T) {
+    S.hint = D.hint;
+    if (!best.used) {
+      best.used = true; S.helps++; S.stress = Math.max(0, S.stress - D.help);
+      const first = S.stress > 50 ? rnd('davi_trava') : rnd('davi_fala');
+      setMsg([first, rnd('ajuda' + best.i, best.i)], 9);
+      beep(660, .25, .05); setTimeout(() => beep(880, .3, .05), 180);
+    } else {
+      setMsg(rnd('repete'), 4.5);
+    }
+  } else {
+    setMsg('Nada para fazer aqui. Procure um funcionário de colete amarelo, um toten azul ou o portão.', 3);
+  }
+}
+
+/* ---------- Puzzles ---------- */
+const puz = $('puz'), puzTitle = $('puzTitle'), puzIntro = $('puzIntro'), puzBody = $('puzBody'), puzMsg = $('puzMsg'), puzHint = $('puzHint');
+let cur = null, timers = [], hintFn = null;
+const later = (fn, ms) => { const id = setTimeout(fn, ms); timers.push(id); return id; };
+const say = t => { puzMsg.textContent = t; };
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function openModal(kind, idx, title, intro) {
+  for (const k in keys) keys[k] = false;
+  joy.id = null; joy.x = 0; joy.y = 0;
+  S.state = 'puzzle'; cur = { kind, idx }; hintFn = null;
+  puzTitle.textContent = title; puzIntro.textContent = intro; puzBody.innerHTML = ''; puzMsg.textContent = '';
+  puzHint.hidden = false; puz.hidden = false; $('puzClose').focus();
+}
+function closeModal() {
+  timers.forEach(clearTimeout); timers = [];
+  if (cur && cur.kind === 'totem' && S.solved[cur.idx]) {
+    const n = S.solved.filter(Boolean).length;
+    setMsg('Número ' + S.code[cur.idx] + ' anotado. ' + (n < NP ? 'Faltam ' + (NP - n) + ' desafio' + (NP - n > 1 ? 's' : '') + '.' : 'Agora vá até o portão perto do balcão.'), 5);
+  }
+  puz.hidden = true; if (S.state === 'puzzle') S.state = 'play';
+  cur = null; canvas.focus({ preventScroll: true });
+}
+$('puzClose').addEventListener('click', closeModal);
+puzHint.addEventListener('click', () => { if (hintFn) hintFn(); else say('Sem pressa. Respire e tente de novo.'); });
+addEventListener('keydown', e => {
+  if (S.state !== 'puzzle') return;
+  if (e.key === 'Escape') { closeModal(); return; }
+  if (cur && cur.kind === 'code') {
+    if (/^[0-9]$/.test(e.key)) { cur.digit(+e.key); e.preventDefault(); }
+    else if (e.key === 'Backspace') { cur.del(); e.preventDefault(); }
+    else if (e.key === 'Enter') { e.preventDefault(); cur.ok(); }
+  }
+});
+
+function puzWin() {
+  const i = cur.idx;
+  timers.forEach(clearTimeout); timers = [];
+  S.solved[i] = true; S.digits[i] = S.code[i]; S.stress = Math.max(0, S.stress - D.pz);
+  puzBody.innerHTML = '<div class="reveal"><span class="muted">Número do portão</span><b>' + S.code[i] + '</b></div>';
+  say(rnd('venceu')); puzHint.hidden = true; saveGame();
+  beep(523, .25, .05); setTimeout(() => beep(659, .25, .05), 160); setTimeout(() => beep(784, .4, .05), 320);
+}
+const api = { setHint: f => { hintFn = f; }, win: puzWin };
+
+/* 1. Cofre de luzes: repetir um padrão */
+function pLuzes(body) {
+  const names = ['verde', 'vermelho', 'amarelo', 'roxo'], cols = ['#4fb6a6', '#f0644e', '#f2c230', '#9a7bd8'], freqs = [392, 330, 262, 494];
+  body.innerHTML = '<div class="pads"></div><div class="row"><button class="btn sm" id="pPlay" type="button">Ver padrão</button><span class="muted" id="pProg"></span></div>';
+  const pads = body.querySelector('.pads'), btns = [], lens = D.lens.slice();
+  let round = 0, seq = [], pos = 0, busy = false;
+  for (let i = 0; i < 4; i++) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pad'; b.style.setProperty('--c', cols[i]); b.setAttribute('aria-label', names[i]); b.disabled = true;
+    b.addEventListener('click', () => tap(i)); pads.appendChild(b); btns.push(b);
+  }
+  const prog = () => { $('pProg').textContent = 'Rodada ' + (round + 1) + ' de ' + lens.length + ' · ' + pos + '/' + seq.length; };
+  const newSeq = () => { seq = Array.from({ length: lens[round] }, () => Math.floor(Math.random() * 4)); pos = 0; prog(); };
+  const flash = (i, ms) => { btns[i].classList.add('lit'); beep(freqs[i], ms / 1000, .04); later(() => btns[i].classList.remove('lit'), ms); };
+  function play() {
+    busy = true; pos = 0; prog(); btns.forEach(b => b.disabled = true); $('pPlay').disabled = true; say('Observe...');
+    seq.forEach((s, k) => later(() => flash(s, 420), 500 + k * 750));
+    later(() => { busy = false; btns.forEach(b => b.disabled = false); $('pPlay').disabled = false; say('Sua vez: repita o padrão.'); }, 500 + seq.length * 750);
+  }
+  function tap(i) {
+    if (busy) return;
+    flash(i, 250);
+    if (i === seq[pos]) {
+      pos++; prog();
+      if (pos === seq.length) {
+        round++;
+        if (round >= lens.length) { later(() => api.win(), 400); busy = true; return; }
+        busy = true; btns.forEach(x => x.disabled = true); newSeq(); say('Muito bem! Agora um padrão um pouco maior.'); later(play, 1400);
+      }
+    } else { busy = true; btns.forEach(x => x.disabled = true); say(rnd('errou_luz')); later(play, 1200); }
+  }
+  $('pPlay').addEventListener('click', () => { if (!busy) play(); });
+  api.setHint(() => say('Dica: o padrão é ' + seq.map(s => names[s]).join(', ') + '.'));
+  newSeq(); later(play, 600);
+}
+
+/* 2. Placas diferentes: busca visual */
+function pPlacas(body) {
+  const rounds = [['▲', '▼'], ['◐', '◑'], ['O', 'Q'], ['M', 'N'], ['E', 'F']].slice(0, D.placas);
+  let r = 0, odd = 0;
+  body.innerHTML = '<div class="grid" id="pg"></div><p class="muted" id="pr"></p>';
+  const g = body.querySelector('#pg');
+  function build() {
+    g.innerHTML = ''; const [a, b] = rounds[r]; odd = Math.floor(Math.random() * 24);
+    for (let i = 0; i < 24; i++) {
+      const c = document.createElement('button');
+      c.type = 'button'; c.className = 'cell'; c.textContent = i === odd ? b : a; c.setAttribute('aria-label', 'símbolo ' + (i + 1));
+      c.addEventListener('click', () => pick(i, c)); g.appendChild(c);
+    }
+    $('pr').textContent = 'Rodada ' + (r + 1) + ' de ' + rounds.length + ': ache o símbolo diferente.';
+  }
+  function pick(i, c) {
+    if (i === odd) { r++; if (r >= rounds.length) { api.win(); return; } say(rnd('acertou') + ' Próxima rodada.'); build(); }
+    else { c.classList.add('no'); say(rnd('errou')); later(() => c.classList.remove('no'), 500); }
+  }
+  api.setHint(() => {
+    const row = Math.floor(odd / 6), cells = [...g.children];
+    cells.forEach((c, i) => { if (Math.floor(i / 6) === row) c.classList.add('hl'); });
+    later(() => cells.forEach(c => c.classList.remove('hl')), 2500);
+    say('Dica: o diferente está na linha destacada.');
+  });
+  build();
+}
+
+/* Ordenar itens tocando um a um na ordem certa */
+function pOrdem(body, steps, intro, wrongMsg) {
+  let order; do { order = shuffle(steps.map((_, i) => i)); } while (order[0] === 0);
+  let next = 0;
+  body.innerHTML = '<div class="cards"></div>';
+  const wrapEl = body.querySelector('.cards'), els = {};
+  order.forEach(idx => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'stepc'; b.textContent = steps[idx]; els[idx] = b;
+    b.addEventListener('click', () => {
+      if (b.classList.contains('done')) return;
+      if (idx === next) {
+        b.classList.add('done'); b.dataset.n = String(next + 1); next++; say(rnd('acertou'));
+        if (next === steps.length) later(() => api.win(), 500);
+      } else { b.classList.add('no'); say(wrongMsg); later(() => b.classList.remove('no'), 500); }
+    });
+    wrapEl.appendChild(b);
+  });
+  api.setHint(() => { const e = els[next]; if (!e) return; e.classList.add('hl'); later(() => e.classList.remove('hl'), 2500); say('Dica: o próximo está destacado.'); });
+  say(intro);
+}
+/* 3. Roteiro: passos de pedir ajuda */
+function pRoteiro(body) {
+  pOrdem(body, [
+    'Respirar fundo e procurar um funcionário de colete',
+    'Chegar perto e esperar a pessoa olhar para você',
+    'Dizer o nome e o problema: “Oi, sou o Davi. Estou perdido.”',
+    'Dizer aonde precisa ir: “Preciso do balcão de Informações.”',
+    'Agradecer e seguir a orientação com calma'
+  ], 'Toque nos passos na ordem certa.', 'Esse passo vem depois. O que vem primeiro?');
+}
+/* 4. Jogo da memória: achar pares */
+function pPares(body) {
+  const sym = ['★', '●', '▲', '■', '◆', '♥', '✚', '♪', '✿', '☾'].slice(0, D.pares);
+  const deck = shuffle([...sym, ...sym]);
+  body.innerHTML = '<div class="mem"></div>';
+  const m = body.querySelector('.mem');
+  let first = null, lock = false, found = 0;
+  deck.forEach((sy, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'mc'; b.dataset.s = sy; b.setAttribute('aria-label', 'carta ' + (i + 1));
+    b.addEventListener('click', () => {
+      if (lock || b.classList.contains('open') || b.classList.contains('ok')) return;
+      b.classList.add('open');
+      if (!first) { first = b; return; }
+      if (first.dataset.s === b.dataset.s) {
+        first.classList.remove('open'); b.classList.remove('open'); first.classList.add('ok'); b.classList.add('ok'); first = null; found++; say(rnd('par'));
+        if (found === sym.length) later(() => api.win(), 600);
+      } else {
+        lock = true; say(rnd('par_no'));
+        const f = first; first = null;
+        later(() => { f.classList.remove('open'); b.classList.remove('open'); lock = false; }, 900);
+      }
+    });
+    m.appendChild(b);
+  });
+  api.setHint(() => {
+    lock = true; const cs = [...m.children].filter(c => !c.classList.contains('ok') && !c.classList.contains('open'));
+    cs.forEach(c => c.classList.add('peek'));
+    later(() => { cs.forEach(c => c.classList.remove('peek')); lock = false; }, 1800); say('Olhe bem as cartas por um instante.');
+  });
+  say('Vire duas cartas de cada vez.');
+}
+/* 5. Qual vem depois? completar um padrão */
+function pSequencia(body) {
+  const sh = ['▲', '●', '■', '◆', '★', '♥', '✚'], cl = ['#4fb6a6', '#f0644e', '#f2c230', '#9a7bd8', '#5aa7ff', '#ff8fb1', '#8fd16b'];
+  const colorOf = s => cl[sh.indexOf(s)];
+  const periods = D.periods;
+  let r = 0, answer = '', per = 2;
+  body.innerHTML = '<div class="seq" id="sq"></div><div class="opts" id="so"></div><p class="muted" id="sr"></p>';
+  const sq = body.querySelector('#sq'), so = body.querySelector('#so');
+  const cell = (s, cls) => { const d = document.createElement('div'); d.className = 'sq' + (cls ? ' ' + cls : ''); d.textContent = s; if (s !== '?') d.style.color = colorOf(s); return d; };
+  function build() {
+    per = periods[r];
+    const units = shuffle([...sh]).slice(0, per);
+    const k = 1 + Math.floor(Math.random() * (per - 1 || 1));
+    const len = per * 2 + (per === 2 ? 1 : k);
+    sq.innerHTML = ''; so.innerHTML = '';
+    for (let i = 0; i < len; i++) sq.appendChild(cell(units[i % per]));
+    sq.appendChild(cell('?', 'q'));
+    answer = units[len % per];
+    const pool = shuffle(sh.filter(s => s !== answer));
+    const opts = shuffle([answer, ...pool.slice(0, 3)]);
+    opts.forEach(o => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.textContent = o; b.style.color = colorOf(o); b.setAttribute('aria-label', 'opção ' + o);
+      b.addEventListener('click', () => {
+        if (o === answer) { r++; if (r >= periods.length) { api.win(); return; } say('Certo! Um padrão um pouco maior agora.'); build(); }
+        else { b.classList.add('no'); say('Quase. Veja o que vem depois do último símbolo.'); later(() => b.classList.remove('no'), 500); }
+      });
+      so.appendChild(b);
+    });
+    body.querySelector('#sr').textContent = 'Rodada ' + (r + 1) + ' de ' + periods.length + ': o que vem no lugar do ?';
+  }
+  api.setHint(() => {
+    [...sq.children].slice(0, per).forEach(c => c.classList.add('hl'));
+    later(() => [...sq.children].forEach(c => c.classList.remove('hl')), 3000);
+    say('Dica: o padrão repete a cada ' + per + ' símbolos (destacados).');
+  });
+  build();
+}
+/* 6. Do mais quieto ao mais barulhento */
+function pSons(body) {
+  pOrdem(body, ['Biblioteca em silêncio', 'Sala de casa à noite', 'Café com conversa baixa', 'Aspirador de pó', 'Shopping lotado', 'Trem passando', 'Show de rock'].filter((_, i) => D.sons.includes(i)),
+    'Toque do lugar mais silencioso ao mais barulhento.', 'Esse é mais barulhento que o próximo da fila. Pense de novo.');
+}
+
+/* ===== Novos puzzles por ambiente ===== */
+function mkOpts(correct, pool, n) {
+  const set = new Set([correct]);
+  shuffle([...pool]).forEach(v => { if (set.size < (n || 4)) set.add(v); });
+  return shuffle([...set]);
+}
+function optButtons(box, opts, onPick) {
+  box.innerHTML = '';
+  opts.forEach(o => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = o;
+    b.addEventListener('click', () => onPick(o, b)); box.appendChild(b);
+  });
+}
+
+/* Metrô 1: traçar o caminho pelas estações */
+function pRota(body) {
+  const N = [['Central', 12, 18], ['Praça', 38, 18], ['Mercado', 64, 18], ['Teatro', 88, 18], ['Biblioteca', 12, 50], ['Museu', 38, 50], ['Parque', 64, 50], ['Porto', 88, 50], ['Escola', 12, 82], ['Hospital', 38, 82], ['Estádio', 64, 82], ['Saída B', 88, 82]];
+  const E = [[0, 1], [1, 2], [2, 3], [4, 5], [6, 7], [8, 9], [10, 11], [0, 4], [1, 5], [2, 6], [3, 7], [4, 8], [5, 9], [6, 10], [7, 11]];
+  const adj = N.map(() => []); E.forEach(([a, b]) => { adj[a].push(b); adj[b].push(a); });
+  const rounds = D.rota; let r = 0, start = 0, end = 0, blocked = [], path = [];
+  body.innerHTML = '<div class="metro"><svg viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div><p class="muted" id="mr"></p>';
+  const box = body.querySelector('.metro'), svg = box.querySelector('svg');
+  const lines = E.map(([a, b]) => {
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('x1', N[a][1]); l.setAttribute('y1', N[a][2]); l.setAttribute('x2', N[b][1]); l.setAttribute('y2', N[b][2]);
+    l.dataset.a = a; l.dataset.b = b; svg.appendChild(l); return l;
+  });
+  const nodes = N.map((n, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'mn'; b.style.left = n[1] + '%'; b.style.top = n[2] + '%';
+    b.dataset.i = i; b.innerHTML = '<small>' + n[0] + '</small>'; b.setAttribute('aria-label', 'Estação ' + n[0]);
+    b.addEventListener('click', () => tap(i)); box.appendChild(b); return b;
+  });
+  function bfs(from, to) {
+    const prev = N.map(() => -2); prev[from] = -1; const q = [from];
+    while (q.length) { const x = q.shift(); if (x === to) break; adj[x].forEach(y => { if (prev[y] === -2 && !blocked.includes(y)) { prev[y] = x; q.push(y); } }); }
+    if (prev[to] === -2) return null;
+    const p = []; for (let x = to; x !== -1; x = prev[x]) p.unshift(x); return p;
+  }
+  function build() {
+    for (let tries = 0; tries < 400; tries++) {
+      const nb = r >= 2 ? 2 : 1;
+      blocked = shuffle(N.map((_, i) => i)).slice(0, nb);
+      const free = N.map((_, i) => i).filter(i => !blocked.includes(i));
+      start = free[Math.floor(Math.random() * free.length)]; end = free[Math.floor(Math.random() * free.length)];
+      const p = start === end ? null : bfs(start, end);
+      if (p && p.length >= 4 && p.length <= 6) break;
+    }
+    path = [start]; render();
+    $('mr').textContent = 'Trajeto ' + (r + 1) + ' de ' + rounds + ': vá de ' + N[start][0] + ' até ' + N[end][0] + ', seguindo as linhas. Evite as estações vermelhas (lotadas).';
+  }
+  function render() {
+    nodes.forEach((n, i) => { n.className = 'mn' + (i === start ? ' start' : '') + (i === end ? ' end' : '') + (blocked.includes(i) ? ' blocked' : '') + (path.includes(i) ? ' on' : ''); });
+    lines.forEach(l => { const a = +l.dataset.a, b = +l.dataset.b, ia = path.indexOf(a), ib = path.indexOf(b); l.classList.toggle('on', ia >= 0 && ib >= 0 && Math.abs(ia - ib) === 1); });
+  }
+  function tap(i) {
+    const last = path[path.length - 1];
+    if (blocked.includes(i)) { say('Essa estação está lotada. Escolha outro caminho.'); return; }
+    if (i === last) return;
+    if (path.length > 1 && i === path[path.length - 2]) { path.pop(); render(); say('Voltou uma estação.'); return; }
+    if (!adj[last].includes(i)) { say('Essas estações não se ligam. Siga as linhas.'); return; }
+    if (path.includes(i)) { say('Você já passou por aqui.'); return; }
+    path.push(i); render();
+    if (i === end) {
+      r++; if (r >= rounds) { later(() => api.win(), 450); return; }
+      say(rnd('acertou') + ' Novo trajeto.'); later(build, 700);
+    } else say('Siga em frente.');
+  }
+  api.setHint(() => {
+    const p = bfs(path[path.length - 1], end);
+    if (!p || p.length < 2) { say('Volte uma estação e tente outro caminho.'); return; }
+    const n = nodes[p[1]]; n.classList.add('hl'); later(() => n.classList.remove('hl'), 2500);
+    say('Dica: a próxima estação é a destacada.');
+  });
+  build();
+}
+
+/* Metrô 2: ler o quadro de horários */
+function pHorario(body) {
+  const LN = ['Verde', 'Azul', 'Vermelha'], pad = n => String(n).padStart(2, '0'), fm = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+  let t = 14 * 60 + Math.floor(Math.random() * 8);
+  const trains = Array.from({ length: 7 }, (_, i) => { t += 6 + Math.floor(Math.random() * 7); return { t, ln: LN[i < 3 ? i : Math.floor(Math.random() * 3)], pl: 1 + Math.floor(Math.random() * 4) }; });
+  body.innerHTML = '<div class="ttw"><table class="tt"><thead><tr><th>Saída</th><th>Linha</th><th>Plataforma</th></tr></thead><tbody></tbody></table></div><p class="q" id="hq"></p><div class="opts4" id="ho"></div><p class="muted" id="hr"></p>';
+  const tb = body.querySelector('tbody');
+  const rows = trains.map(tr => { const row = document.createElement('tr'); row.innerHTML = '<td>' + fm(tr.t) + '</td><td>' + tr.ln + '</td><td>' + tr.pl + '</td>'; tb.appendChild(row); return row; });
+  const rounds = D.hor; let r = 0, hl = [];
+  function ask() {
+    const kind = r % 4, now = trains[1].t - 1 + Math.floor(Math.random() * (trains[4].t - trains[1].t));
+    const nextIdx = trains.findIndex(x => x.t > now); let q, correct, pool;
+    if (kind === 0) {
+      const cand = LN.filter(l => trains.some(x => x.ln === l && x.t > now)), ln = cand[Math.floor(Math.random() * cand.length)];
+      const k = trains.findIndex(x => x.ln === ln && x.t > now);
+      q = 'Agora são ' + fm(now) + '. Qual é o próximo trem da linha ' + ln + '?'; correct = fm(trains[k].t); pool = trains.map(x => fm(x.t));
+      hl = trains.map((x, i) => x.ln === ln ? i : -1).filter(i => i >= 0);
+    } else if (kind === 1) {
+      const k = 1 + Math.floor(Math.random() * 5);
+      q = 'Em qual plataforma sai o trem das ' + fm(trains[k].t) + '?'; correct = String(trains[k].pl); pool = ['1', '2', '3', '4']; hl = [k];
+    } else if (kind === 2) {
+      q = 'Agora são ' + fm(now) + '. Quantos minutos faltam para o próximo trem?'; const d = trains[nextIdx].t - now;
+      correct = String(d); pool = [d - 3, d - 2, d - 1, d + 1, d + 2, d + 3].filter(x => x > 0).map(String); hl = [nextIdx];
+    } else {
+      const cand = LN.filter(l => trains.some(x => x.ln === l)), ln = cand[Math.floor(Math.random() * cand.length)], c = trains.filter(x => x.ln === ln).length;
+      q = 'Quantos trens da linha ' + ln + ' saem nesse quadro?'; correct = String(c); pool = ['1', '2', '3', '4', '5']; hl = trains.map((x, i) => x.ln === ln ? i : -1).filter(i => i >= 0);
+    }
+    $('hq').textContent = q; $('hr').textContent = 'Pergunta ' + (r + 1) + ' de ' + rounds;
+    optButtons($('ho'), mkOpts(correct, pool, 4), (o, b) => {
+      if (o === correct) { r++; if (r >= rounds) { api.win(); return; } say(rnd('acertou')); ask(); }
+      else { b.classList.add('no'); say(rnd('errou')); later(() => b.classList.remove('no'), 500); }
+    });
+  }
+  api.setHint(() => { rows.forEach((row, i) => row.classList.toggle('hl', hl.includes(i))); later(() => rows.forEach(x => x.classList.remove('hl')), 2800); say('Dica: olhe as linhas destacadas.'); });
+  ask();
+}
+
+/* Parque 1: quebra-cabeça deslizante */
+function pQuebra(body) {
+  const nb = i => { const r = Math.floor(i / 3), c = i % 3, o = []; if (r > 0) o.push(i - 3); if (r < 2) o.push(i + 3); if (c > 0) o.push(i - 1); if (c < 2) o.push(i + 1); return o; };
+  const t = [1, 2, 3, 4, 5, 6, 7, 8, 0], solved = () => t.every((v, i) => v === (i + 1) % 9);
+  let e = 8, prev = -1, moves = 0;
+  for (let k = 0; k < D.quebra || solved(); k++) { const o = nb(e).filter(x => x !== prev), n = o[Math.floor(Math.random() * o.length)]; t[e] = t[n]; t[n] = 0; prev = e; e = n; }
+  body.innerHTML = '<div class="slide"></div><p class="muted" id="qm"></p>';
+  const grid2 = body.querySelector('.slide');
+  const btns = t.map((_, i) => { const b = document.createElement('button'); b.type = 'button'; b.addEventListener('click', () => tap(i)); grid2.appendChild(b); return b; });
+  function render() {
+    btns.forEach((b, i) => { const v = t[i]; b.className = 'tile' + (v === 0 ? ' empty' : ''); b.textContent = v === 0 ? '' : String(v); b.style.setProperty('--h', String(v * 40)); b.setAttribute('aria-label', v === 0 ? 'espaço vazio' : 'peça ' + v); });
+    $('qm').textContent = 'Deixe as peças em ordem, de 1 a 8. Movimentos: ' + moves;
+  }
+  function tap(i) {
+    if (!nb(i).includes(e)) { say('Essa peça não encosta no espaço vazio.'); return; }
+    t[e] = t[i]; t[i] = 0; e = i; moves++; render();
+    if (solved()) later(() => api.win(), 400); else say('');
+  }
+  api.setHint(() => {
+    const v = [1, 2, 3, 4, 5, 6, 7, 8].find(x => t[x - 1] !== x);
+    const idx = t.indexOf(v); btns[idx].classList.add('hl'); later(() => btns[idx].classList.remove('hl'), 2500);
+    say('Dica: leve a peça ' + v + ' até o lugar dela. Monte a fileira de cima primeiro.');
+  });
+  render(); say('Toque numa peça ao lado do espaço vazio para movê-la.');
+}
+
+/* Parque 2: contar balões */
+function pContar(body) {
+  const C = [['vermelhos', '#f0644e', '●'], ['azuis', '#5aa7ff', '▲'], ['amarelos', '#f2c230', '■'], ['verdes', '#6fcf7a', '◆']];
+  const COLS = 7, ROWS = 5, rounds = D.contar; let r = 0, target = 0, count = 0;
+  body.innerHTML = '<div class="legend"></div><div class="field"></div><p class="q" id="cq"></p><div class="opts4" id="co"></div><p class="muted" id="cr"></p>';
+  body.querySelector('.legend').innerHTML = C.map(c => '<span><i style="background:' + c[1] + '">' + c[2] + '</i>' + c[0] + '</span>').join('');
+  const field = body.querySelector('.field');
+  function build() {
+    let bal = [], tries = 0;
+    do {
+      const total = 12 + r * 4, slots = shuffle(Array.from({ length: COLS * ROWS }, (_, i) => i)).slice(0, total);
+      bal = slots.map(sl => ({ sl, c: Math.floor(Math.random() * 4) })); target = Math.floor(Math.random() * 4); count = bal.filter(b => b.c === target).length;
+    } while ((count < 2 || count > 9) && ++tries < 200);
+    field.innerHTML = '';
+    bal.forEach(b => {
+      const d = document.createElement('span'); d.className = 'bal'; d.dataset.c = b.c; d.textContent = C[b.c][2]; d.style.background = C[b.c][1];
+      d.style.left = ((b.sl % COLS + .5) / COLS * 100 + (Math.random() - .5) * 3) + '%'; d.style.top = ((Math.floor(b.sl / COLS) + .5) / ROWS * 100 + (Math.random() - .5) * 5) + '%';
+      field.appendChild(d);
+    });
+    $('cq').textContent = 'Quantos balões ' + C[target][0] + ' (' + C[target][2] + ') há no campo?';
+    $('cr').textContent = 'Rodada ' + (r + 1) + ' de ' + rounds;
+    optButtons($('co'), mkOpts(String(count), [count - 2, count - 1, count + 1, count + 2, count + 3].filter(x => x >= 0).map(String), 4).sort((a, b) => a - b), (o, b) => {
+      if (o === String(count)) { r++; if (r >= rounds) { api.win(); return; } say(rnd('acertou') + ' Mais uma contagem.'); build(); }
+      else { b.classList.add('no'); say(rnd('errou') + ' Conte devagar, um por um.'); later(() => b.classList.remove('no'), 500); }
+    });
+  }
+  api.setHint(() => {
+    const els = [...field.children].filter(x => +x.dataset.c === target); els.forEach(x => x.classList.add('pulse'));
+    later(() => els.forEach(x => x.classList.remove('pulse')), 2500); say('Dica: os balões destacados são os que você deve contar.');
+  });
+  build();
+}
+
+/* Escola 1: horário das aulas (lógica com pistas) */
+function pGrade(body) {
+  const n = D.grade, names = ['Matemática', 'Artes', 'Ciências', 'História', 'Inglês'].slice(0, n), times = ['7h30', '8h20', '9h10', '10h20', '11h10'];
+  const perms = [];
+  (function gen(a, rest) { if (!rest.length) { perms.push(a); return; } rest.forEach((x, i) => gen([...a, x], rest.filter((_, j) => j !== i))); })([], [...Array(n).keys()]);
+  const sol = perms[Math.floor(Math.random() * perms.length)];
+  const soft = [], fix = [];
+  for (let a = 0; a < n; a++) {
+    fix.push({ test: p => p[a] === sol[a], txt: names[a] + ' é na ' + (sol[a] + 1) + 'ª aula.' });
+    for (let k = 0; k < n; k++) if (k !== sol[a]) soft.push({ test: p => p[a] !== k, txt: names[a] + ' não é na ' + (k + 1) + 'ª aula.' });
+    for (let b = 0; b < n; b++) if (a !== b) {
+      if (sol[a] < sol[b]) soft.push({ test: p => p[a] < p[b], txt: names[a] + ' vem antes de ' + names[b] + '.' });
+      if (sol[a] === sol[b] + 1) soft.push({ test: p => p[a] === p[b] + 1, txt: names[a] + ' vem logo depois de ' + names[b] + '.' });
+    }
+  }
+  let cur = perms; const chosen = [];
+  [...shuffle(soft), ...shuffle(fix)].forEach(c => { if (cur.length > 1) { const nx = cur.filter(c.test); if (nx.length < cur.length) { chosen.push(c); cur = nx; } } });
+  body.innerHTML = '<ul class="clues"></ul><div id="gs"></div><div class="chips" id="gc"></div>';
+  body.querySelector('.clues').innerHTML = chosen.map(c => '<li>' + c.txt + '</li>').join('');
+  const place = Array(n).fill(-1); let sel = -1;
+  const slotsEl = body.querySelector('#gs'), chipsEl = body.querySelector('#gc');
+  const sbs = names.map((_, k) => {
+    const row = document.createElement('div'); row.className = 'srow';
+    row.innerHTML = '<span class="st">' + (k + 1) + 'ª aula · ' + times[k] + '</span>';
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'sb'; b.addEventListener('click', () => clickSlot(k)); row.appendChild(b); slotsEl.appendChild(row); return b;
+  });
+  const chips = names.map((nm, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = nm; b.addEventListener('click', () => { sel = sel === i ? -1 : i; render(); }); chipsEl.appendChild(b); return b; });
+  function check() {
+    if (place.some(x => x < 0)) return;
+    if (place.every((sj, k) => sol[sj] === k)) { later(() => api.win(), 350); } else say('Ainda não. Releia as pistas: veja o que vem antes e depois.');
+  }
+  function render() {
+    sbs.forEach((b, k) => { b.textContent = place[k] >= 0 ? names[place[k]] : 'Toque para escolher'; b.classList.toggle('filled', place[k] >= 0); });
+    chips.forEach((c, i) => { c.classList.toggle('sel', sel === i); c.classList.toggle('used', place.includes(i)); });
+  }
+  function clickSlot(k) {
+    if (sel >= 0) { const old = place.indexOf(sel); if (old >= 0) place[old] = -1; place[k] = sel; sel = -1; render(); check(); }
+    else if (place[k] >= 0) { place[k] = -1; render(); }
+    else say('Primeiro toque numa matéria, depois na aula.');
+  }
+  api.setHint(() => {
+    const k = place.findIndex((sj, kk) => sj < 0 || sol[sj] !== kk); if (k < 0) return;
+    const sj = sol.indexOf(k), old = place.indexOf(sj); if (old >= 0) place[old] = -1; place[k] = sj; render();
+    say('Dica: coloquei ' + names[sj] + ' na ' + (k + 1) + 'ª aula.'); check();
+  });
+  render(); say('Use as pistas para montar o horário. Toque numa matéria e depois na aula.');
+}
+
+/* Escola 2: palavras embaralhadas */
+function pPalavra(body) {
+  const WORDS = [['MOCHILA', 'Você carrega nas costas.'], ['CADERNO', 'Onde se escreve a lição.'], ['RECREIO', 'Hora de brincar e lanchar.'], ['MERENDA', 'O lanche da escola.'], ['QUADRA', 'Lugar de jogar bola.'], ['PROFESSOR', 'Quem ensina na sala.'], ['BIBLIOTECA', 'Lugar cheio de livros.'], ['SECRETARIA', 'Onde a mãe do Davi espera.']];
+  const list = shuffle([...WORDS]).slice(0, D.palavra).sort((a, b) => a[0].length - b[0].length);
+  let r = 0, word = '', ans = [], tiles = [];
+  body.innerHTML = '<p class="q" id="wc"></p><div class="wslots" id="ws"></div><div class="wpool" id="wp"></div><p class="muted" id="wr"></p>';
+  const ws = $('ws'), wp = $('wp');
+  function build() {
+    word = list[r][0]; ans = [];
+    let letters; do { letters = shuffle(word.split('')); } while (letters.join('') === word);
+    tiles = letters.map((ch, i) => ({ ch, i }));
+    $('wc').textContent = 'Pista: ' + list[r][1]; $('wr').textContent = 'Palavra ' + (r + 1) + ' de ' + list.length + ' · ' + word.length + ' letras';
+    render();
+  }
+  function render() {
+    ws.innerHTML = ''; wp.innerHTML = '';
+    for (let k = 0; k < word.length; k++) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ls' + (ans[k] !== undefined ? ' fill' : '');
+      b.textContent = ans[k] !== undefined ? tiles[ans[k]].ch : ''; b.setAttribute('aria-label', 'letra ' + (k + 1));
+      b.addEventListener('click', () => { if (ans[k] !== undefined) { ans.splice(k, 1); render(); } }); ws.appendChild(b);
+    }
+    tiles.forEach((tl, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'lt' + (ans.includes(i) ? ' used' : ''); b.textContent = tl.ch;
+      b.addEventListener('click', () => { if (ans.includes(i) || ans.length >= word.length) return; ans.push(i); render(); check(); }); wp.appendChild(b);
+    });
+  }
+  function check() {
+    if (ans.length < word.length) return;
+    if (ans.map(i => tiles[i].ch).join('') === word) {
+      r++; if (r >= list.length) { later(() => api.win(), 400); return; }
+      say(rnd('acertou') + ' Próxima palavra.'); later(build, 800);
+    } else {
+      [...ws.children].forEach(x => x.classList.add('no')); say('Ainda não forma a palavra. Toque numa letra para tirar e tente outra ordem.');
+      later(() => [...ws.children].forEach(x => x.classList.remove('no')), 700);
+    }
+  }
+  api.setHint(() => {
+    while (ans.length && tiles[ans[ans.length - 1]].ch !== word[ans.length - 1]) ans.pop();
+    for (let k = 0; k < ans.length; k++) if (tiles[ans[k]].ch !== word[k]) { ans.length = k; break; }
+    const need = word[ans.length], i = tiles.findIndex((tl, idx) => tl.ch === need && !ans.includes(idx));
+    if (i >= 0) { ans.push(i); render(); say('Dica: a próxima letra é ' + need + '.'); check(); }
+  });
+  build();
+}
+
+/* ===== Puzzles avançados ===== */
+/* Cofre: descobrir o código com pistas (estilo Master Mind) */
+function pCofre(body) {
+  const [K, M] = D.cofre, code = shuffle(Array.from({ length: M }, (_, i) => i + 1)).slice(0, K);
+  let cur = []; const known = new Set(); let tries = 0;
+  body.innerHTML = '<p class="muted">Código de ' + K + ' dígitos diferentes, de 1 a ' + M + '. Cada tentativa mostra: ● dígito certo no lugar certo, ○ dígito certo no lugar errado.</p><div class="clist" id="cl"></div><div class="curd" id="cc"></div><div class="opts9" id="cp"></div><div class="srow"><button type="button" class="btn ghost sm" id="cb">Apagar</button></div>';
+  const cl = $('cl'), cc = $('cc'), cp = $('cp');
+  function drawCur() { cc.innerHTML = ''; for (let i = 0; i < K; i++) { const e = document.createElement('i'); e.textContent = cur[i] || ''; if (cur[i]) e.className = 'f'; cc.appendChild(e); } }
+  for (let d = 1; d <= M; d++) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = d; b.dataset.d = d;
+    b.addEventListener('click', () => {
+      if (cur.includes(d)) { say('Os dígitos do código são todos diferentes.'); return; }
+      if (cur.length >= K) return;
+      cur.push(d); drawCur();
+      if (cur.length === K) submit();
+    });
+    cp.appendChild(b);
+  }
+  $('cb').addEventListener('click', () => { cur.pop(); drawCur(); });
+  function submit() {
+    tries++;
+    const ex = cur.filter((d, i) => d === code[i]).length, pa = cur.filter(d => code.includes(d)).length - ex;
+    const row = document.createElement('div'); row.className = 'crow';
+    row.innerHTML = '<b>' + cur.join('') + '</b><span>● ' + ex + ' · ○ ' + pa + '</span>'; cl.appendChild(row);
+    if (ex === K) { later(() => api.win(), 450); return; }
+    cur = []; drawCur(); say('Tentativa ' + tries + '. Use as pistas das tentativas anteriores.');
+  }
+  api.setHint(() => {
+    const left = [...Array(K).keys()].filter(i => !known.has(i)); if (!left.length) return;
+    const p = left[0]; known.add(p); say('Dica: o dígito da posição ' + (p + 1) + ' é ' + code[p] + '.');
+  });
+  drawCur(); say('Escolha os dígitos. A tentativa é enviada quando você completa todos.');
+}
+
+/* Sudoku 4x4 */
+function pSudoku(body) {
+  const base = [[0, 1, 2, 3], [2, 3, 0, 1], [1, 2, 3, 0], [3, 0, 1, 2]], sym = shuffle([1, 2, 3, 4]);
+  const ord = () => shuffle([0, 1]).flatMap(b0 => [0, 1].map(x => b0 * 2 + x)); const ro = shuffle([0, 1]).flatMap(b0 => shuffle([0, 1]).map(x => b0 * 2 + x)), co = shuffle([0, 1]).flatMap(b0 => shuffle([0, 1]).map(x => b0 * 2 + x));
+  const sol = ro.map(r => co.map(c => sym[base[r][c]])).flat();
+  const given = Array(16).fill(true); shuffle([...Array(16).keys()]).slice(0, D.sudoku).forEach(i => given[i] = false);
+  const v = sol.map((x, i) => given[i] ? x : 0); let sel = -1;
+  body.innerHTML = '<div class="sgrid" style="grid-template-columns:repeat(4,minmax(0,1fr))"></div><div class="opts4" id="sn"></div><div class="srow"><button type="button" class="btn ghost sm" id="sc">Limpar casa</button></div>';
+  const g = body.querySelector('.sgrid'), cells = v.map((_, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'sd' + (i % 4 === 1 ? ' b' : '') + (Math.floor(i / 4) === 1 ? ' r' : ''); b.addEventListener('click', () => { if (given[i]) return; sel = i; render(); }); g.appendChild(b); return b; });
+  [1, 2, 3, 4].forEach(n => { const b = document.createElement('button'); b.type = 'button'; b.textContent = n; b.addEventListener('click', () => put(n)); $('sn').appendChild(b); });
+  $('sc').addEventListener('click', () => put(0));
+  const groups = []; for (let k = 0; k < 4; k++) { groups.push([0, 1, 2, 3].map(c => k * 4 + c)); groups.push([0, 1, 2, 3].map(r => r * 4 + k)); const br = Math.floor(k / 2) * 2, bc = (k % 2) * 2; groups.push([0, 1, 4, 5].map(o => br * 4 + bc + o)); }
+  function bad() { const b = new Set(); groups.forEach(gr => { const seen = {}; gr.forEach(i => { if (v[i]) (seen[v[i]] = seen[v[i]] || []).push(i); }); Object.values(seen).forEach(a => { if (a.length > 1) a.forEach(i => b.add(i)); }); }); return b; }
+  function render() { const b = bad(); cells.forEach((c, i) => { c.textContent = v[i] || ''; c.classList.toggle('given', given[i]); c.classList.toggle('sel', i === sel); c.classList.toggle('no', b.has(i)); c.setAttribute('aria-label', 'casa ' + (i + 1)); }); }
+  function put(n) {
+    if (sel < 0) { say('Toque numa casa vazia primeiro.'); return; }
+    v[sel] = n; render();
+    if (v.every(x => x) && !bad().size) later(() => api.win(), 400);
+    else if (bad().size) say('Tem número repetido na linha, coluna ou quadrado (casas vermelhas).'); else say('');
+  }
+  api.setHint(() => {
+    const i = v.findIndex((x, k) => !given[k] && x !== sol[k]); if (i < 0) return;
+    v[i] = sol[i]; sel = i; render(); cells[i].classList.add('hl'); later(() => cells[i].classList.remove('hl'), 2000);
+    say('Dica: preenchi uma casa. Cada linha, coluna e quadrado 2x2 leva 1, 2, 3 e 4.');
+    if (v.every(x => x) && !bad().size) later(() => api.win(), 500);
+  });
+  render(); say('Preencha de 1 a 4: sem repetir em cada linha, coluna e quadrado 2x2.');
+}
+
+/* Apagar as luzes: cada toque inverte a casa e as vizinhas */
+function pApagar(body) {
+  const [n, np] = D.apagar; let on, need;
+  const nbs = i => { const r = Math.floor(i / n), c = i % n, o = [i]; if (r > 0) o.push(i - n); if (r < n - 1) o.push(i + n); if (c > 0) o.push(i - 1); if (c < n - 1) o.push(i + 1); return o; };
+  do {
+    on = Array(n * n).fill(false); need = new Set(shuffle([...Array(n * n).keys()]).slice(0, np));
+    need.forEach(i => nbs(i).forEach(j => on[j] = !on[j]));
+  } while (!on.some(Boolean));
+  let moves = 0;
+  body.innerHTML = '<div class="sgrid" style="grid-template-columns:repeat(' + n + ',minmax(0,1fr));max-width:' + (n === 5 ? 340 : 300) + 'px"></div><p class="muted" id="am"></p>';
+  const g = body.querySelector('.sgrid'), cells = on.map((_, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lo'; b.setAttribute('aria-label', 'luz ' + (i + 1)); b.addEventListener('click', () => press(i)); g.appendChild(b); return b; });
+  function render() { cells.forEach((c, i) => c.classList.toggle('on', on[i])); $('am').textContent = 'Toques: ' + moves + '. Cada toque muda a luz e as vizinhas (cima, baixo, lados).'; }
+  function press(i) {
+    nbs(i).forEach(j => on[j] = !on[j]); need.has(i) ? need.delete(i) : need.add(i); moves++; render();
+    if (!on.some(Boolean)) later(() => api.win(), 450);
+  }
+  api.setHint(() => { const i = [...need][0]; if (i === undefined) return; cells.forEach(c => c.classList.remove('hl')); cells[i].classList.add('hl'); later(() => cells[i].classList.remove('hl'), 2500); say('Dica: toque na luz destacada.'); });
+  render(); say('Deixe todas as luzes apagadas.');
+}
+
+/* Torre de Hanói */
+function pTorre(body) {
+  const n = D.torre; const pos = Array(n).fill(0); let sel = -1, moves = 0;
+  body.innerHTML = '<div class="pegs"></div><p class="muted" id="tm"></p>';
+  const pegs = [0, 1, 2].map(p => { const b = document.createElement('button'); b.type = 'button'; b.className = 'peg'; b.dataset.p = p; b.setAttribute('aria-label', 'pino ' + (p + 1)); b.addEventListener('click', () => tap(p)); body.querySelector('.pegs').appendChild(b); return b; });
+  const top = (st, p) => st.findIndex(x => x === p);
+  function render() {
+    pegs.forEach((pg, p) => {
+      pg.innerHTML = ''; pg.classList.toggle('sel', sel === p);
+      for (let d = n - 1; d >= 0; d--) if (pos[d] === p) { const e = document.createElement('div'); e.className = 'disc'; e.style.width = (28 + d * 14) + '%'; e.style.setProperty('--h', String(d * 50 + 10)); pg.appendChild(e); }
+    });
+    $('tm').textContent = 'Movimentos: ' + moves + '. Leve todos os discos para o 3º pino. Disco maior nunca fica sobre um menor.';
+  }
+  function tap(p) {
+    if (sel < 0) { if (top(pos, p) < 0) { say('Esse pino está vazio.'); return; } sel = p; render(); return; }
+    if (sel === p) { sel = -1; render(); return; }
+    const d = top(pos, sel), t = top(pos, p);
+    if (t >= 0 && t < d) { say('Não pode colocar um disco maior sobre um menor.'); sel = -1; render(); return; }
+    pos[d] = p; sel = -1; moves++; render(); say('');
+    if (pos.every(x => x === 2)) later(() => api.win(), 450);
+  }
+  function nextMove() {
+    const key = st => st.join(''), goal = key(Array(n).fill(2)), start = key(pos), prev = new Map([[start, null]]), q = [start];
+    while (q.length) {
+      const k = q.shift(); if (k === goal) break; const st = k.split('').map(Number);
+      for (let a = 0; a < 3; a++) { const d = top(st, a); if (d < 0) continue; for (let b = 0; b < 3; b++) { if (a === b) continue; const t = top(st, b); if (t >= 0 && t < d) continue; const ns = [...st]; ns[d] = b; const nk = key(ns); if (!prev.has(nk)) { prev.set(nk, [k, a, b]); q.push(nk); } } }
+    }
+    let c = goal, mv = null; while (prev.get(c)) { const [pk, a, b] = prev.get(c); mv = [a, b]; c = pk; } return mv;
+  }
+  api.setHint(() => { const m = nextMove(); if (!m) return; pegs[m[0]].classList.add('hl'); pegs[m[1]].classList.add('hl'); later(() => pegs.forEach(x => x.classList.remove('hl')), 2500); say('Dica: mova o disco de cima do pino ' + (m[0] + 1) + ' para o pino ' + (m[1] + 1) + '.'); });
+  render(); say('Toque no pino de origem e depois no de destino.');
+}
+
+/* Quadrado mágico 3x3 */
+function pMagico(body) {
+  let sq = [[2, 7, 6], [9, 5, 1], [4, 3, 8]];
+  for (let k = Math.floor(Math.random() * 4); k > 0; k--) sq = sq[0].map((_, c) => sq.map(r => r[c]).reverse());
+  if (Math.random() < .5) sq = sq.map(r => [...r].reverse());
+  const sol = sq.flat(), given = Array(9).fill(true); given[4] = Math.random() < .5;
+  shuffle([...Array(9).keys()]).filter(i => i !== 4).slice(0, D.magico - (given[4] ? 0 : 1)).forEach(i => given[i] = false);
+  if (!given[4]) { /* centro vazio conta como uma das casas vazias */ }
+  const v = sol.map((x, i) => given[i] ? x : 0); let sel = -1;
+  body.innerHTML = '<p class="muted">Use os números de 1 a 9, sem repetir. Toda linha, coluna e diagonal deve somar <b>15</b>.</p><div class="sgrid" style="grid-template-columns:repeat(3,minmax(0,1fr));max-width:280px"></div><div class="opts9" id="mn"></div><div class="srow"><button type="button" class="btn ghost sm" id="mc">Limpar casa</button></div>';
+  const g = body.querySelector('.sgrid'), cells = v.map((_, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'sd'; b.addEventListener('click', () => { if (given[i]) return; sel = i; render(); }); g.appendChild(b); return b; });
+  const nb = []; for (let d = 1; d <= 9; d++) { const b = document.createElement('button'); b.type = 'button'; b.textContent = d; b.addEventListener('click', () => put(d)); $('mn').appendChild(b); nb.push(b); }
+  $('mc').addEventListener('click', () => put(0));
+  const lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+  const ok = () => v.every(x => x) && new Set(v).size === 9 && lines.every(l => l.reduce((a, i) => a + v[i], 0) === 15);
+  function render() { cells.forEach((c, i) => { c.textContent = v[i] || ''; c.classList.toggle('given', given[i]); c.classList.toggle('sel', i === sel); }); nb.forEach((b, k) => b.classList.toggle('used', v.includes(k + 1))); }
+  function put(d) {
+    if (sel < 0) { say('Toque numa casa vazia primeiro.'); return; }
+    if (d && v.includes(d) && v[sel] !== d) { say('O ' + d + ' já está no quadrado.'); return; }
+    v[sel] = d; render();
+    if (v.every(x => x)) { if (ok()) later(() => api.win(), 400); else say('Está completo, mas alguma soma não dá 15. Confira linhas, colunas e diagonais.'); } else say('');
+  }
+  api.setHint(() => {
+    const i = v.findIndex((x, k) => !given[k] && x !== sol[k]); if (i < 0) return;
+    const j = v.findIndex((x, k) => k !== i && x === sol[i]); if (j >= 0 && !given[j]) v[j] = 0;
+    v[i] = sol[i]; sel = i; render(); cells[i].classList.add('hl'); later(() => cells[i].classList.remove('hl'), 2000);
+    say('Dica: o 5 fica no centro e os cantos opostos somam 10.'); if (ok()) later(() => api.win(), 500);
+  });
+  render(); say('Toque numa casa vazia e depois num número.');
+}
+
+/* Travessia: cachorro, gato e passarinho */
+function pTravessia(body) {
+  const names = ['Cachorro', 'Gato', 'Passarinho'], bad = [[0, 1], [1, 2]];
+  const st = { d: 0, it: [0, 0, 0] }; let moves = 0;
+  body.innerHTML = '<p class="muted">Davi atravessa a rua com um bicho por vez. Sozinhos, o cachorro persegue o gato e o gato pega o passarinho.</p><div class="banks"><div class="bank" id="b0"><h3>Lado de cá</h3></div><div class="bank" id="b1"><h3>Lado de lá</h3></div></div><div class="srow"><button type="button" class="btn ghost sm" id="tAlone">Atravessar sozinho</button><span class="muted" id="tmv"></span></div>';
+  const banks = [$('b0'), $('b1')];
+  const unsafe = (side, it) => bad.find(([a, b]) => it[a] === side && it[b] === side);
+  function render() {
+    banks.forEach(b => [...b.querySelectorAll('button')].forEach(x => x.remove()));
+    const me = document.createElement('button'); me.type = 'button'; me.className = 'it me'; me.textContent = 'Davi'; banks[st.d].appendChild(me);
+    st.it.forEach((side, k) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'it'; b.dataset.k = k; b.textContent = names[k]; b.addEventListener('click', () => cross(k)); banks[side].appendChild(b); });
+    $('tmv').textContent = 'Travessias: ' + moves;
+  }
+  function cross(k) {
+    const from = st.d;
+    if (k !== null && st.it[k] !== from) { say(names[k] + ' está do outro lado. Davi só leva quem está com ele.'); return; }
+    const ni = [...st.it]; if (k !== null) ni[k] = 1 - from;
+    const u = unsafe(from, ni);
+    if (u) { say(u[0] === 0 ? 'Sem Davi, o cachorro assusta o gato.' : 'Sem Davi, o gato pega o passarinho.'); const el = body.querySelector('.it[data-k="' + (k === null ? u[0] : k) + '"]'); if (el) { el.classList.add('no'); later(() => el.classList.remove('no'), 500); } return; }
+    st.d = 1 - from; st.it = ni; moves++; render(); say('');
+    if (st.d === 1 && ni.every(x => x === 1)) later(() => api.win(), 450);
+  }
+  $('tAlone').addEventListener('click', () => cross(null));
+  function nextMove() {
+    const key = (d, it) => d + it.join(''), goal = '1111', start = key(st.d, st.it), prev = new Map([[start, null]]), q = [[st.d, [...st.it]]];
+    while (q.length) {
+      const [d, it] = q.shift(); if (key(d, it) === goal) break;
+      for (const k of [null, 0, 1, 2]) { if (k !== null && it[k] !== d) continue; const ni = [...it]; if (k !== null) ni[k] = 1 - d; if (unsafe(d, ni)) continue; const nk = key(1 - d, ni); if (!prev.has(nk)) { prev.set(nk, [key(d, it), k]); q.push([1 - d, ni]); } }
+    }
+    let c = goal, mv; while (prev.get(c)) { const [pk, k] = prev.get(c); mv = k; c = pk; } return mv;
+  }
+  api.setHint(() => {
+    const m = nextMove(); if (m === undefined) return;
+    const el = m === null ? $('tAlone') : body.querySelector('.it[data-k="' + m + '"]'); if (!el) return;
+    el.classList.add('hl'); later(() => el.classList.remove('hl'), 2500);
+    say(m === null ? 'Dica: Davi atravessa sozinho desta vez.' : 'Dica: leve o ' + names[m].toLowerCase() + ' (destacado).');
+  });
+  render(); say('Toque no bicho que Davi vai levar, ou em "Atravessar sozinho".');
+}
+
+const TOTEM = {
+  luzes: { t: 'Cofre de luzes', i: 'Observe a ordem em que as luzes acendem e repita. Pode rever quantas vezes quiser.', f: pLuzes },
+  placas: { t: 'Placas diferentes', i: 'Em cada rodada, um símbolo é diferente dos outros. Ache ele.', f: pPlacas },
+  roteiro: { t: 'Roteiro de pedir ajuda', i: 'Coloque em ordem os passos para pedir ajuda a alguém.', f: pRoteiro },
+  pares: { t: 'Jogo da memória', i: 'Vire duas cartas por vez e encontre os pares. Sem limite de tentativas.', f: pPares },
+  sequencia: { t: 'Qual vem depois?', i: 'Os símbolos se repetem num padrão. Escolha o que vem depois do último.', f: pSequencia },
+  sons: { t: 'Do mais quieto ao mais barulhento', i: 'Coloque os lugares em ordem, do mais silencioso ao mais barulhento.', f: pSons },
+  cofre: { t: 'Cofre de números', i: 'Descubra o código secreto usando as pistas de cada tentativa.', f: pCofre },
+  sudoku: { t: 'Sudoku 4x4', i: 'Complete a grade sem repetir números na linha, coluna e quadrado.', f: pSudoku },
+  apagar: { t: 'Apague as luzes', i: 'Cada toque inverte a luz tocada e as vizinhas. Apague todas.', f: pApagar },
+  torre: { t: 'Torre de discos', i: 'Mova a torre inteira para o 3º pino, um disco por vez.', f: pTorre },
+  magico: { t: 'Quadrado mágico', i: 'Complete o quadrado para que todas as somas deem 15.', f: pMagico },
+  travessia: { t: 'Travessia da rua', i: 'Leve todos para o outro lado sem deixar ninguém em perigo.', f: pTravessia },
+  rota: { t: 'Mapa do metrô', i: 'Toque nas estações, da partida até o destino, seguindo as linhas. Evite as estações lotadas (vermelhas).', f: pRota },
+  horario: { t: 'Quadro de horários', i: 'Leia o quadro de horários dos trens e responda às perguntas.', f: pHorario },
+  quebra: { t: 'Quebra-cabeça do parque', i: 'Deslize as peças até ficarem em ordem, de 1 a 8.', f: pQuebra },
+  contar: { t: 'Conte os balões', i: 'Conte os balões da cor pedida. Os símbolos ajudam a diferenciar as cores.', f: pContar },
+  grade: { t: 'Horário das aulas', i: 'Descubra a ordem das aulas usando as pistas.', f: pGrade },
+  palavra: { t: 'Palavras embaralhadas', i: 'Toque nas letras para formar a palavra da pista.', f: pPalavra }
+};
+function openTotem(i) {
+  if (S.solved[i]) { setMsg('Você já resolveu este desafio. O número é ' + S.code[i] + '.', 3.5); return; }
+  const def = TOTEM[totens[i].id];
+  openModal('totem', i, def.t, def.i);
+  def.f(puzBody);
+}
+
+function openCode() {
+  openModal('code', 0, 'Portão de atendimento', 'Digite o código de ' + NP + ' números. Cada toten azul mostra um número depois que você resolve o desafio dele.');
+  let entered = [];
+  puzBody.innerHTML = '<p class="muted" id="cKnown" style="text-align:center"></p><div class="slots" id="cSlots"></div><div class="keypad" id="cPad"></div>';
+  const slots = $('cSlots'), pad = $('cPad');
+  const render = () => {
+    slots.innerHTML = Array.from({ length: NP }, (_, i) => i).map(i => '<div class="slot">' + (entered[i] !== undefined ? entered[i] : '') + '</div>').join('');
+    $('cKnown').textContent = 'Números descobertos: ' + S.digits.map(d => d == null ? '_' : d).join(' ');
+  };
+  const add = d => { if (entered.length < NP) { entered.push(d); render(); } };
+  const del = () => { entered.pop(); render(); };
+  const ok = () => {
+    if (entered.length < NP) { say('Faltam números.'); return; }
+    if (entered.join('') === S.code.join('')) {
+      gatePos.forEach(g => { grid[g[1]][g[0]] = 0; });
+      closeModal(); setMsg(rnd('portao'), 5); saveGame();
+      beep(523, .2, .05); setTimeout(() => beep(784, .35, .05), 200);
+    } else { entered = []; render(); say(rnd('codigo_errado')); }
+  };
+  cur.digit = add; cur.del = del; cur.ok = ok;
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 'Apagar', 0, 'OK'].forEach(k => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = k;
+    if (k === 'OK') b.className = 'go';
+    b.addEventListener('click', () => { if (k === 'Apagar') del(); else if (k === 'OK') ok(); else add(k); });
+    pad.appendChild(b);
+  });
+  hintFn = () => say('Você já tem ' + S.digits.filter(d => d != null).length + ' de ' + NP + ' números. Procure os totens azuis pelo shopping.');
+  render();
+}
+
+/* ---------- Áudio ---------- */
+let au = null;
+function initAudio() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (au) { au.c.resume(); return; }
+    const c = new AC();
+    const len = c.sampleRate * 2, buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.2; }
+    const src = c.createBufferSource(); src.buffer = buf; src.loop = true;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    const g = c.createGain(); g.gain.value = 0;
+    src.connect(lp); lp.connect(g); g.connect(c.destination); src.start();
+    const osc = c.createOscillator(); osc.type = 'sine'; osc.frequency.value = 2200;
+    const og = c.createGain(); og.gain.value = 0; osc.connect(og); og.connect(c.destination); osc.start();
+    au = { c, lp, g, og };
+  } catch (_) { au = null; }
+}
+function beep(f, dur, vol) {
+  if (!au || !soundOn) return;
+  try {
+    const o = au.c.createOscillator(), g = au.c.createGain(), t = au.c.currentTime;
+    o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(au.c.destination); o.start(t); o.stop(t + dur + .05);
+  } catch (_) {}
+}
+function audioUpdate() {
+  if (!au) return;
+  const t = au.c.currentTime, on = soundOn && S.state === 'play';
+  const lvl = clamp(S.nzRaw / 28, 0, 1);
+  let gain = on ? 0.03 + lvl * 0.15 : 0;
+  let freq = 700 + lvl * 2600;
+  if (S.hpOn) { gain *= 0.25; freq = 380; }
+  if (S.quietNow) gain *= 0.35;
+  au.g.gain.setTargetAtTime(gain, t, 0.12);
+  au.lp.frequency.setTargetAtTime(freq, t, 0.12);
+  const ring = on && !S.hpOn && S.stress > 65 ? (S.stress - 65) / 35 * 0.01 : 0;
+  au.og.gain.setTargetAtTime(ring, t, 0.2);
+}
+
+/* ---------- Atualização ---------- */
+function update(dt) {
+  const p = S.p;
+  S.time += dt; S.t += dt;
+  S.bumpCd = Math.max(0, S.bumpCd - dt); S.shake = Math.max(0, S.shake - dt * 2);
+  S.hint = Math.max(0, S.hint - dt);
+  if (S.msgT > 0) S.msgT -= dt;
+
+  for (const n of S.npcs) {
+    n.tt -= dt;
+    if (n.sayT > 0) n.sayT -= dt;
+    else if (dist(p, n) < 2.4 * T && Math.random() < dt * 0.12) { n.say = rnd('conversa'); n.sayT = 3; }
+    if (n.tt <= 0) { n.a = Math.random() * 6.283; n.tt = 1.5 + Math.random() * 3; n.sp = n.kid ? 70 + Math.random() * 40 : 30 + Math.random() * 30; }
+    const nx = n.x + Math.cos(n.a) * n.sp * dt, ny = n.y + Math.sin(n.a) * n.sp * dt;
+    if (!solidC(nx, ny, 11)) { n.x = nx; n.y = ny; } else { n.a += Math.PI * (0.6 + Math.random() * 0.8); n.tt = 1 + Math.random(); }
+  }
+
+  let dx = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0);
+  let dy = (keys.ArrowDown || keys.KeyS ? 1 : 0) - (keys.ArrowUp || keys.KeyW ? 1 : 0);
+  if (dx === 0 && dy === 0) { dx = joy.x; dy = joy.y; }
+  const frozen = S.shutdown > 0;
+  const moving = !frozen && (dx !== 0 || dy !== 0);
+  const stim = !frozen && !!(keys.ShiftLeft || keys.ShiftRight);
+  const breathing = !frozen && !!keys.Space && !moving;
+  S.moving = moving; S.stimming = stim; S.breathing = breathing;
+  if (moving) {
+    const l = Math.hypot(dx, dy), sp = 130 * (stim ? 0.55 : 1);
+    const mx = dx / l * sp * dt, my = dy / l * sp * dt;
+    if (!solidC(p.x + mx, p.y, 11)) p.x += mx;
+    if (!solidC(p.x, p.y + my, 11)) p.y += my;
+  }
+
+  if (S.hpOn) { S.battery -= D.drain * dt; if (S.battery <= 0) { S.battery = 0; S.hpOn = false; setMsg('A bateria dos fones acabou.', 2.5); } }
+  S.batteries.forEach(b => { if (!b.got && dist(p, b) < 0.7 * T) { b.got = true; S.battery = Math.min(100, S.battery + 40); setMsg(rnd('bateria_ok'), 2.4); beep(780, .2, .04); } });
+
+  let nz = 0, vis = 0;
+  speakers.forEach(s => { const d = dist(p, s), R = (s.R || 5) * T; if (d < R) nz += (s.rate || 16) * (1 - d / R); });
+  S.npcs.forEach(n => { const d = dist(p, n), R = 2.4 * T; if (d < R) nz += 7 * (1 - d / R); });
+  let flashAmt = 0;
+  lights.forEach(l => { const d = dist(p, l), R = 3.5 * T; if (d < R) { const on = flashOn(l); vis += 9 * (1 - d / R) * (on ? 1 : 0.15); if (on) flashAmt = Math.max(flashAmt, 1 - d / R); } });
+  L.events.forEach((ev, k) => {
+    const st = evState(ev, S.time);
+    if (st.warn && S.evWarn[k] !== st.cycle) { S.evWarn[k] = st.cycle; setMsg(ev.warn, 5); }
+    if (st.active) {
+      if (ev.rect) { const d = distRect(p, ev.rect), R = (ev.R || 3.5) * T; if (d < R) nz += ev.rate * (1 - d / R); }
+      else nz += ev.rate;
+    }
+  });
+  nz *= D.nz; vis *= D.nz;
+  S.nzRaw = nz; S.flash = flashAmt;
+
+  S.quietNow = quiets.some(q => dist(p, q) < 1.3 * T);
+
+  S.thinkCd = Math.max(0, S.thinkCd - dt);
+  if (S.shutdown <= 0) {
+    const near = S.npcs.filter(n => dist(p, n) < 1.8 * T).length;
+    if (S.battery < 20 && S.hpOn) think('bateria');
+    else if (S.flash > 0.5) think('luz');
+    else if (nz > 12 && !S.hpOn) think('barulho');
+    else if (near >= 2) think('multidao');
+    else if (S.stress > 60) think('tenso');
+    else if (S.stress < 25 && S.time > 20) think('calmo');
+  }
+  // anúncios no alto-falante
+  S.annCd -= dt;
+  if (S.ann) { S.ann.life -= dt; if (S.ann.life <= 0) S.ann = null; }
+  if (S.annCd <= 0) {
+    S.annCd = 14 + Math.random() * 12;
+    if (!S.hpOn && speakers.some(sp => dist(p, sp) < 5.5 * T)) { S.ann = { t: rnd('anuncio'), life: 4.5 }; if (S.shutdown <= 0) S.stress = Math.min(99, S.stress + 3); }
+  }
+
+  if (S.shutdown > 0) {
+    S.shutdown -= dt;
+    S.stress += (D.after - S.stress) * Math.min(1, dt * 1.2);
+    if (S.shutdown <= 0) { S.stress = D.after; setMsg(rnd('recupera'), 4); }
+  } else {
+    if (S.hpOn) nz *= 0.25;
+    if (breathing) nz *= 0.5;
+    if (S.quietNow) { nz = 0; vis *= 0.2; }
+    let rate = nz + vis + D.base;
+    if (breathing) rate -= 14 * D.rec;
+    if (stim) rate -= 5 * D.rec;
+    if (S.quietNow) rate -= 18 * D.rec;
+    S.stress = clamp(S.stress + rate * dt, 0, 100);
+
+    if (S.bumpCd <= 0) {
+      for (const n of S.npcs) if (dist(p, n) < 22) {
+        S.stress = Math.min(100, S.stress + 10 * D.nz); S.bumpCd = 1.2; S.shake = 0.6; setMsg(rnd('esbarrao'), 2.8); break;
+      }
+    }
+    if (S.quietNow && !S.quietToast) { S.quietToast = true; think('quieto', true); }
+    if (!S.quietNow) S.quietToast = false;
+
+    if (S.stress >= 100) {
+      S.stress = 100; S.shutdown = 4.5; S.shutCount++; S.shake = 1;
+      setMsg(rnd('crise'), 4.5);
+    }
+  }
+
+  if (dist(p, goal) < 1.1 * T) win();
+}
+function flashOn(l) { return ((S.t * 2 + l.ph) % 1) < 0.5; }
+
+function win() {
+  S.state = 'win'; markDone();
+  const m = Math.floor(S.time / 60), s = Math.floor(S.time % 60);
+  $('sTime').textContent = m + ':' + String(s).padStart(2, '0');
+  $('sShut').textContent = S.shutCount; $('sHelp').textContent = S.helps; $('sPuz').textContent = S.solved.filter(Boolean).length + '/' + NP;
+  const last = LV === LEVELS.length - 1;
+  $('endTitle').textContent = last ? 'O Davi chegou até o fim' : 'Davi encontrou a mãe';
+  $('endText').textContent = (S.shutCount === 0
+    ? fmt('Davi chegou {ao_goal} sem nenhuma sobrecarga total. ')
+    : 'Mesmo com ' + S.shutCount + (S.shutCount === 1 ? ' sobrecarga total' : ' sobrecargas totais') + ', o Davi se recuperou e chegou. ') + rnd('mae') + (last ? ' Você completou as ' + LEVELS.length + ' fases!' : '');
+  $('nextBtn').textContent = last ? 'Voltar à fase 1' : 'Próxima fase: ' + LEVELS[LV + 1].name;
+  $('endTip').textContent = 'Dica para a próxima: ' + rnd('dica');
+  $('end').hidden = false;
+  beep(523, .3, .05); setTimeout(() => beep(659, .3, .05), 180); setTimeout(() => beep(784, .5, .05), 360);
+}
+
+/* ---------- Desenho ---------- */
+let vw = 960, vh = 600, zoom = 1, dpr = 1;
+function resize() {
+  const cw = stage.clientWidth, narrow = cw < 600;
+  const ch = Math.round(narrow ? cw * 1.05 : Math.min(cw * 0.625, 640));
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.style.height = ch + 'px';
+  canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
+  vw = cw; vh = ch; zoom = narrow ? 0.8 : 1;
+}
+addEventListener('resize', resize);
+
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function shade(hex, f) { const n = parseInt(hex.slice(1), 16); const c = i => clamp(Math.round(((n >> i) & 255) * f), 0, 255); return `rgb(${c(16)},${c(8)},${c(0)})`; }
+
+function person(x, y, shirt, skin, bob) {
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(x, y + 9, 12, 5, 0, 0, 6.283); ctx.fill();
+  ctx.fillStyle = shirt; ctx.beginPath(); ctx.ellipse(x, y + 3 + bob, 11, 9, 0, 0, 6.283); ctx.fill();
+  ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(x, y - 6 + bob, 7.5, 0, 6.283); ctx.fill();
+  ctx.fillStyle = 'rgba(40,30,30,.85)'; ctx.beginPath(); ctx.arc(x, y - 8 + bob, 7.5, Math.PI, 0); ctx.fill();
+}
+function drawDavi() {
+  const p = S.p, bob = S.moving ? Math.sin(S.t * 12) * 1.2 : 0;
+  ctx.save();
+  if (S.shutdown > 0) { ctx.translate(0, 4); }
+  ctx.fillStyle = '#c25a3a'; rr(p.x - 8, p.y + 6 + bob, 16, 9, 3); ctx.fill();
+  person(p.x, p.y, '#4b5a8f', '#e7b48f', bob);
+  ctx.fillStyle = '#3a4472'; ctx.beginPath(); ctx.arc(p.x, p.y - 1 + bob, 6, 0, Math.PI); ctx.fill();
+  ctx.fillStyle = '#222'; ctx.fillRect(p.x - 4, p.y - 6 + bob, 2, 2); ctx.fillRect(p.x + 2, p.y - 6 + bob, 2, 2);
+  if (S.hpOn) {
+    ctx.strokeStyle = '#e8604c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y - 7 + bob, 9, Math.PI, 0); ctx.stroke();
+    ctx.fillStyle = '#e8604c'; ctx.beginPath(); ctx.arc(p.x - 9, p.y - 6 + bob, 4, 0, 6.283); ctx.arc(p.x + 9, p.y - 6 + bob, 4, 0, 6.283); ctx.fill();
+  }
+  if (S.shutdown > 0) {
+    ctx.fillStyle = '#e7b48f'; ctx.beginPath(); ctx.arc(p.x - 10, p.y - 6, 4, 0, 6.283); ctx.arc(p.x + 10, p.y - 6, 4, 0, 6.283); ctx.fill();
+  } else if (S.stimming) {
+    const s = Math.sin(S.t * 18) * 3;
+    ctx.fillStyle = '#e7b48f'; ctx.beginPath(); ctx.arc(p.x - 13 + s, p.y + 2, 3.2, 0, 6.283); ctx.arc(p.x + 13 - s, p.y + 2, 3.2, 0, 6.283); ctx.fill();
+  }
+  if (S.breathing) {
+    const k = (Math.sin(S.t * 2.2) + 1) / 2;
+    ctx.strokeStyle = `rgba(79,182,166,${0.25 + 0.4 * (1 - k)})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, 20 + k * 20, 0, 6.283); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function tip(x, y, text) {
+  ctx.font = '800 13px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const w = ctx.measureText(text).width + 16;
+  ctx.fillStyle = 'rgba(20,24,42,.92)'; rr(x - w / 2, y - 11, w, 22, 8); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.fillText(text, x, y);
+}
+function drawWorld(cx, cy) {
+  const x0 = Math.max(0, Math.floor(cx / T)), y0 = Math.max(0, Math.floor(cy / T));
+  const x1 = Math.min(W - 1, Math.ceil((cx + vw / zoom) / T)), y1 = Math.min(H - 1, Math.ceil((cy + vh / zoom) / T));
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const g = grid[y][x];
+    ctx.fillStyle = g === 1 || g === 2 ? L.wall : L.floor[(x + y) & 1];
+    ctx.fillRect(x * T, y * T, T, T);
+  }
+  // blocos (lojas, trilhos, lago, árvores...)
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  blocks.forEach(b => {
+    const [x, y, w, h, name, col, kind] = b;
+    const X = x * T, Y = y * T, WW = w * T, HH = h * T;
+    if (X > cx + vw / zoom || X + WW < cx || Y > cy + vh / zoom || Y + HH < cy) return;
+    if (kind === 'tracks') {
+      ctx.fillStyle = '#f2c230'; ctx.fillRect(X, Y - 9, WW, 5); ctx.fillRect(X, Y + HH + 4, WW, 5);
+      ctx.fillStyle = '#242839'; ctx.fillRect(X, Y, WW, HH);
+      ctx.fillStyle = '#4a4f66'; for (let k = 6; k < WW; k += 20) ctx.fillRect(X + k, Y + 6, 7, HH - 12);
+      ctx.fillStyle = '#9aa0b8'; [0.22, 0.4, 0.62, 0.8].forEach(f => ctx.fillRect(X, Y + HH * f - 2, WW, 4));
+      ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.font = '800 14px Nunito, sans-serif'; ctx.fillText('TRILHOS · cuidado com o trem', X + WW / 2, Y + HH / 2);
+    } else if (kind === 'lake') {
+      ctx.fillStyle = shade(col, .7); rr(X, Y, WW, HH, 26); ctx.fill();
+      ctx.fillStyle = col; rr(X + 5, Y + 5, WW - 10, HH - 10, 22); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2;
+      for (let k = 0; k < 6; k++) { const rx = X + 40 + (k * 83) % (WW - 80), ry = Y + 30 + (k * 47) % (HH - 60); ctx.beginPath(); ctx.arc(rx, ry, 10 + (k % 3) * 4, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke(); }
+      ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.font = '800 15px Nunito, sans-serif'; ctx.fillText(name, X + WW / 2, Y + HH / 2);
+    } else if (kind === 'trees') {
+      ctx.fillStyle = shade(col, .6); ctx.fillRect(X, Y, WW, HH);
+      for (let j = 0; j < h; j++) for (let k = 0; k < w; k++) {
+        const cxp = X + (k + .5) * T, cyp = Y + (j + .5) * T, v = (k * 7 + j * 13) % 3;
+        ctx.fillStyle = shade(col, .85 + v * .12); ctx.beginPath(); ctx.arc(cxp, cyp, T * .62, 0, 6.283); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(cxp - 7, cyp - 8, T * .22, 0, 6.283); ctx.fill();
+      }
+    } else {
+      ctx.fillStyle = shade(col, .62); ctx.fillRect(X, Y, WW, HH);
+      ctx.fillStyle = col; ctx.fillRect(X + 5, Y + 5, WW - 10, HH - 10);
+      ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.fillRect(X + 5, Y + HH - 22, WW - 10, 17);
+      ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.font = '800 15px Nunito, sans-serif'; ctx.fillText(name, X + WW / 2, Y + HH / 2 - 4);
+    }
+  });
+  // balcão / saída / secretaria
+  const dk = L.desk;
+  ctx.fillStyle = '#7a5a3a'; ctx.fillRect(dk.x * T, dk.y * T, dk.w * T, T - 6);
+  ctx.fillStyle = '#a57c52'; ctx.fillRect(dk.x * T + 4, dk.y * T + 4, dk.w * T - 8, T - 16);
+  ctx.fillStyle = '#fff'; ctx.font = '800 13px Nunito, sans-serif'; ctx.fillText(dk.label, (dk.x + dk.w / 2) * T, dk.y * T + T / 2 - 4);
+  // eventos com área (trem passando)
+  L.events.forEach(ev => {
+    if (!ev.rect) return;
+    const st = evState(ev, S.time), [rx, ry, rw, rh] = ev.rect.map(v => v * T);
+    if (st.warn) { ctx.strokeStyle = 'rgba(242,194,48,.95)'; ctx.setLineDash([12, 10]); ctx.lineWidth = 4; ctx.strokeRect(rx - 6, ry - 6, rw + 12, rh + 12); ctx.setLineDash([]); }
+    if (st.active) {
+      ctx.fillStyle = 'rgba(240,100,78,.12)'; ctx.fillRect(rx - 3.5 * T, ry - 3.5 * T, rw + 7 * T, rh + 7 * T);
+      const tl = 12 * T, tx = rx - tl + st.prog * (rw + tl * 2);
+      ctx.save(); ctx.beginPath(); ctx.rect(rx, ry, rw, rh); ctx.clip();
+      ctx.fillStyle = '#c9ccd6'; rr(tx, ry + 10, tl, rh - 20, 12); ctx.fill();
+      ctx.fillStyle = '#e8604c'; ctx.fillRect(tx, ry + rh / 2 - 4, tl, 8);
+      ctx.fillStyle = '#4a5578'; for (let k = 14; k < tl - 30; k += 44) ctx.fillRect(tx + k, ry + 18, 30, 16);
+      ctx.restore();
+    }
+  });
+  // cantinhos calmos
+  quiets.forEach(q => {
+    ctx.fillStyle = 'rgba(79,182,166,.28)'; ctx.beginPath(); ctx.arc(q.x, q.y, 1.3 * T, 0, 6.283); ctx.fill();
+    ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(79,182,166,.9)'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#6d7aa8'; rr(q.x - 14, q.y - 5, 28, 10, 4); ctx.fill();
+  });
+  // luzes piscando
+  lights.forEach(l => {
+    const on = flashOn(l);
+    ctx.fillStyle = on ? '#ff5ec4' : '#5a4a66'; rr(l.x - 16, l.y - 7, 32, 14, 4); ctx.fill();
+    if (on) { const g = ctx.createRadialGradient(l.x, l.y, 4, l.x, l.y, 3.5 * T); g.addColorStop(0, 'rgba(255,94,196,.38)'); g.addColorStop(1, 'rgba(255,94,196,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(l.x, l.y, 3.5 * T, 0, 6.283); ctx.fill(); }
+  });
+  // alto-falantes
+  speakers.forEach(s => {
+    for (let k = 0; k < 3; k++) {
+      const f = ((S.t * 0.5 + k / 3) % 1);
+      ctx.strokeStyle = `rgba(240,100,78,${(1 - f) * 0.32})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(s.x, s.y, f * (s.R || 5) * T, 0, 6.283); ctx.stroke();
+    }
+    ctx.fillStyle = '#2b3050'; rr(s.x - 9, s.y - 9, 18, 18, 4); ctx.fill();
+    ctx.fillStyle = '#f0644e'; ctx.beginPath(); ctx.arc(s.x, s.y, 5, 0, 6.283); ctx.fill();
+  });
+  // baterias
+  S.batteries.forEach(b => {
+    if (b.got) return;
+    const bob = Math.sin(S.t * 3 + b.x) * 2;
+    ctx.fillStyle = '#2f9e5b'; rr(b.x - 9, b.y - 6 + bob, 18, 12, 3); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.fillRect(b.x + 9, b.y - 2 + bob, 3, 4); ctx.font = '800 11px Nunito, sans-serif'; ctx.fillText('+', b.x - 1, b.y + bob);
+  });
+  // objetivo
+  const pulse = (Math.sin(S.t * 3) + 1) / 2;
+  ctx.fillStyle = `rgba(242,194,48,${0.18 + pulse * 0.12})`; ctx.beginPath(); ctx.arc(goal.x, goal.y, 1.1 * T, 0, 6.283); ctx.fill();
+  // mãe
+  person(goal.x, goal.y + 2, '#8a4fb0', '#d9a37c', Math.sin(S.t * 4) * 1.2);
+  ctx.fillStyle = '#d9a37c'; ctx.beginPath(); ctx.arc(goal.x + 14, goal.y - 8 + Math.sin(S.t * 6) * 4, 3.5, 0, 6.283); ctx.fill();
+  ctx.fillStyle = '#fff'; rr(goal.x - 30, goal.y - 42, 60, 20, 8); ctx.fill();
+  ctx.fillStyle = '#222'; ctx.font = '800 13px Nunito, sans-serif'; ctx.fillText('Davi!', goal.x, goal.y - 32);
+  // funcionários
+  S.helpers.forEach(h => {
+    person(h.x, h.y, '#f2c230', '#c98d63', 0);
+    ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillRect(h.x - 6, h.y + 2, 12, 3);
+    if (!S.shutdown && dist(S.p, h) < 1.7 * T) {
+      ctx.font = '800 13px Nunito, sans-serif'; const t = 'E: mostrar cartão de ajuda', w = ctx.measureText(t).width + 16;
+      ctx.fillStyle = 'rgba(20,24,42,.92)'; rr(h.x - w / 2, h.y - 38, w, 22, 8); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillText(t, h.x, h.y - 27);
+    }
+  });
+  // portões
+  gatePos.forEach(g => {
+    if (grid[g[1]][g[0]] !== 3) return;
+    const X = g[0] * T, Y = g[1] * T;
+    ctx.fillStyle = '#2b3050'; ctx.fillRect(X, Y, T, T);
+    ctx.save(); ctx.beginPath(); ctx.rect(X + 3, Y + 3, T - 6, T - 6); ctx.clip();
+    ctx.fillStyle = '#f2c230'; ctx.fillRect(X, Y, T, T); ctx.fillStyle = '#1b1b1b';
+    for (let k = -T; k < T * 2; k += 16) { ctx.beginPath(); ctx.moveTo(X + k, Y + T); ctx.lineTo(X + k + 8, Y + T); ctx.lineTo(X + k + 8 + T, Y); ctx.lineTo(X + k + T, Y); ctx.fill(); }
+    ctx.restore();
+    ctx.fillStyle = '#2b3050'; rr(X + T / 2 - 9, Y + T / 2 - 8, 18, 16, 3); ctx.fill();
+    ctx.fillStyle = '#f2c230'; ctx.fillRect(X + T / 2 - 3, Y + T / 2 - 3, 6, 7);
+    if (!S.shutdown && S.state === 'play' && dist(S.p, gateCenter(g)) < 1.6 * T) tip(X + T / 2, Y + T / 2 + 40, 'E: digitar o código');
+  });
+  // totens de desafio
+  totens.forEach((t, i) => {
+    const done = S.solved[i], pulse = (Math.sin(S.t * 3 + i) + 1) / 2;
+    if (!done) { ctx.fillStyle = `rgba(90,170,255,${0.15 + pulse * 0.15})`; ctx.beginPath(); ctx.arc(t.x, t.y, 28 + pulse * 4, 0, 6.283); ctx.fill(); }
+    ctx.fillStyle = '#2b3050'; rr(t.x - 11, t.y - 16, 22, 32, 5); ctx.fill();
+    ctx.fillStyle = done ? '#2f9e5b' : '#3b82f6'; rr(t.x - 8, t.y - 13, 16, 18, 3); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = '800 13px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(done ? String(S.code[i]) : '?', t.x, t.y - 4);
+    if (!S.shutdown && S.state === 'play' && dist(S.p, t) < 1.5 * T) tip(t.x, t.y - 30, done ? 'E: rever o número' : 'E: resolver desafio');
+  });
+  // multidão
+  S.npcs.forEach(n => person(n.x, n.y, n.shirt, n.skin, Math.sin(S.t * 8 + n.x) * 1));
+  S.npcs.forEach(n => {
+    if (!(n.sayT > 0)) return;
+    const txt = S.hpOn ? '…' : n.say;
+    ctx.font = '700 12px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const w = ctx.measureText(txt).width + 14;
+    ctx.globalAlpha = Math.min(1, n.sayT * 2);
+    ctx.fillStyle = '#fff'; rr(n.x - w / 2, n.y - 36, w, 20, 8); ctx.fill();
+    ctx.fillStyle = '#222'; ctx.fillText(txt, n.x, n.y - 26);
+    ctx.globalAlpha = 1;
+  });
+  drawDavi();
+  // seta de ajuda
+  if (S.hint > 0) {
+    const a = Math.atan2(goal.y - S.p.y, goal.x - S.p.x), r = 46 + Math.sin(S.t * 5) * 3;
+    ctx.save(); ctx.translate(S.p.x + Math.cos(a) * r, S.p.y + Math.sin(a) * r); ctx.rotate(a);
+    ctx.fillStyle = '#f2c230'; ctx.strokeStyle = '#3a2d00'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(-8, -9); ctx.lineTo(-4, 0); ctx.lineTo(-8, 9); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
+}
+
+function wrapLines(t, maxW) {
+  const words = t.split(' '), lines = []; let l = '';
+  for (const w of words) { const test = l ? l + ' ' + w : w; if (ctx.measureText(test).width > maxW && l) { lines.push(l); l = w; } else l = test; }
+  if (l) lines.push(l); return lines;
+}
+
+function drawHud() {
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  const bw = Math.min(240, vw * 0.5), x = 14, y = 16;
+  ctx.fillStyle = 'rgba(20,24,42,.8)'; rr(8, 8, bw + 12, S.battery < 100 || S.hpOn ? 98 : 80, 10); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = '800 12px Nunito, sans-serif';
+  const word = S.shutdown > 0 ? 'sobrecarga total' : S.stress < 30 ? 'calmo' : S.stress < 60 ? 'tenso' : S.stress < 85 ? 'muito alto' : 'no limite';
+  ctx.fillText('Sobrecarga sensorial', x, y + 8);
+  ctx.fillStyle = '#a9b0cc'; ctx.textAlign = 'right'; ctx.fillText(word, x + bw - 2, y + 8); ctx.textAlign = 'left';
+  ctx.fillStyle = 'rgba(255,255,255,.12)'; rr(x, y + 14, bw, 12, 6); ctx.fill();
+  const hue = 170 - 162 * (S.stress / 100);
+  ctx.fillStyle = `hsl(${hue},70%,55%)`; rr(x, y + 14, Math.max(8, bw * S.stress / 100), 12, 6); ctx.fill();
+  ctx.fillStyle = '#a9b0cc'; ctx.font = '700 12px Nunito, sans-serif';
+  ctx.fillText('Objetivo: ' + L.goalName + ' ↗', x, y + 44);
+  ctx.fillStyle = S.digits.every(d => d != null) ? '#f2c230' : '#a9b0cc';
+  ctx.fillText('Código do portão: ' + S.digits.map(d => d == null ? '_' : d).join(' '), x, y + 62);
+  if (S.battery < 100 || S.hpOn) {
+    ctx.fillStyle = S.hpOn ? '#4fb6a6' : '#a9b0cc'; ctx.fillText('Fones ' + (S.hpOn ? 'ligados' : 'desligados'), x, y + 80);
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; rr(x + 110, y + 71, bw - 112, 8, 4); ctx.fill();
+    ctx.fillStyle = S.battery < 25 ? '#f0644e' : '#4fb6a6'; rr(x + 110, y + 71, Math.max(0, (bw - 112) * S.battery / 100), 8, 4); ctx.fill();
+  }
+  // tempo
+  const m = Math.floor(S.time / 60), s = Math.floor(S.time % 60), tt = 'Fase ' + (LV + 1) + ' · ' + m + ':' + String(s).padStart(2, '0');
+  ctx.font = '800 14px Nunito, sans-serif'; const tw = ctx.measureText(tt).width + 20;
+  ctx.fillStyle = 'rgba(20,24,42,.8)'; rr(vw - tw - 8, 8, tw, 28, 10); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'right'; ctx.fillText(tt, vw - 18, 27); ctx.textAlign = 'left';
+  // aviso de evento (trem, show, sinal)
+  let annY = 112;
+  const evo = L.events.map(ev => ({ ev, st: evState(ev, S.time) })).find(o => o.st.active || o.st.warn);
+  if (evo) {
+    ctx.font = '800 14px Nunito, sans-serif'; ctx.textAlign = 'center';
+    const txt = evo.st.active ? evo.ev.label : evo.ev.label + ' em instantes', bw2 = Math.min(vw - 24, ctx.measureText(txt).width + 36);
+    ctx.fillStyle = evo.st.active ? 'rgba(240,100,78,.95)' : 'rgba(242,194,48,.95)'; rr(vw / 2 - bw2 / 2, annY, bw2, 28, 10); ctx.fill();
+    ctx.fillStyle = evo.st.active ? '#fff' : '#2a2000'; ctx.textBaseline = 'middle'; ctx.fillText(txt, vw / 2, annY + 14); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    annY += 36;
+  }
+  // anúncio do alto-falante
+  if (S.ann && !S.hpOn) {
+    ctx.font = '800 13px Nunito, sans-serif'; ctx.textAlign = 'center';
+    const lines = wrapLines(S.ann.t, Math.min(vw - 48, 420)), hh = lines.length * 18 + 14;
+    ctx.globalAlpha = Math.min(1, S.ann.life * 2);
+    ctx.fillStyle = 'rgba(240,100,78,.92)'; rr(vw / 2 - Math.min(vw - 24, 440) / 2, annY, Math.min(vw - 24, 440), hh, 10); ctx.fill();
+    ctx.fillStyle = '#fff'; lines.forEach((l, i) => ctx.fillText(l, vw / 2, annY + 18 + i * 18));
+    ctx.globalAlpha = 1; ctx.textAlign = 'left';
+  }
+  // mensagens
+  if (S.msgT > 0 && S.msgs.length) {
+    ctx.font = '700 14px Nunito, sans-serif';
+    const maxW = Math.min(vw - 40, 560), lines = S.msgs.flatMap(m => wrapLines(m, maxW - 24));
+    const hh = lines.length * 19 + 16, ww = Math.min(maxW, Math.max(...lines.map(l => ctx.measureText(l).width)) + 28);
+    ctx.globalAlpha = Math.min(1, S.msgT * 2);
+    ctx.fillStyle = 'rgba(20,24,42,.92)'; rr(vw / 2 - ww / 2, vh - hh - 14, ww, hh, 10); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    lines.forEach((l, i) => ctx.fillText(l, vw / 2, vh - hh - 14 + 21 + i * 19));
+    ctx.globalAlpha = 1; ctx.textAlign = 'left';
+  }
+}
+
+function draw() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#0c0f1f'; ctx.fillRect(0, 0, vw, vh);
+  const viewW = vw / zoom, viewH = vh / zoom;
+  const cx = clamp(S.p.x - viewW / 2, 0, Math.max(0, W * T - viewW)), cy = clamp(S.p.y - viewH / 2, 0, Math.max(0, H * T - viewH));
+  let sx = 0, sy = 0;
+  if (!calmFx && S.state === 'play') {
+    const amp = (S.stress > 70 ? (S.stress - 70) / 30 * 3 : 0) + S.shake * 5;
+    sx = (Math.random() - .5) * amp; sy = (Math.random() - .5) * amp;
+  }
+  ctx.save();
+  ctx.translate(-cx * zoom + sx, -cy * zoom + sy); ctx.scale(zoom, zoom);
+  drawWorld(cx, cy);
+  ctx.restore();
+
+  const st = S.stress;
+  if (S.state === 'play' || S.state === 'puzzle') {
+    if (!calmFx && S.flash > 0 && !S.hpOn === true || (!calmFx && S.flash > 0)) {
+      const on = lights.some(l => flashOn(l) && dist(S.p, l) < 3.5 * T);
+      if (on) { ctx.fillStyle = `rgba(255,255,255,${0.1 * S.flash})`; ctx.fillRect(0, 0, vw, vh); }
+    }
+    const a = Math.max(0, (st - 35) / 65) * 0.65;
+    if (a > 0) {
+      const g = ctx.createRadialGradient(vw / 2, vh / 2, Math.min(vw, vh) * 0.25, vw / 2, vh / 2, Math.max(vw, vh) * 0.66);
+      g.addColorStop(0, 'rgba(60,10,20,0)'); g.addColorStop(1, `rgba(60,10,20,${a})`);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, vw, vh);
+    }
+    if (S.shutdown > 0) {
+      ctx.fillStyle = 'rgba(10,12,28,.55)'; ctx.fillRect(0, 0, vw, vh);
+      const k = (Math.sin(S.t * 1.6) + 1) / 2, r = 36 + k * 30;
+      ctx.strokeStyle = 'rgba(79,182,166,.9)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(vw / 2, vh / 2, r, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = '600 22px Fredoka, sans-serif';
+      ctx.fillText('Respire com o círculo', vw / 2, vh / 2 - 90);
+      ctx.font = '700 14px Nunito, sans-serif'; ctx.fillStyle = '#a9b0cc';
+      ctx.fillText(k > .5 ? 'solte o ar devagar' : 'puxe o ar devagar', vw / 2, vh / 2 + 100); ctx.textAlign = 'left';
+    }
+    drawHud();
+  }
+}
+
+/* ---------- Loop ---------- */
+let last = performance.now();
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = clamp((now - last) / 1000, 0, 0.05); last = now;
+  try {
+    if (S.state === 'play') update(dt); else { S.t += dt; if (S.state === 'puzzle') S.stress = Math.max(0, S.stress - 3 * dt); }
+    audioUpdate(); draw();
+  } catch (err) { console.error(err); }
+}
+
+function begin() {
+  initAudio(); if (au) au.c.resume();
+  reset('play'); ['menu', 'end', 'puz', 'intro'].forEach(id => { $(id).hidden = true; });
+  joy.id = null; joy.x = 0; joy.y = 0; canvas.focus({ preventScroll: true });
+  setMsg(rnd('inicio'), 6);
+}
+function startLevel(i) { loadLevel(i); begin(); }
+function showIntro(i) {
+  loadLevel(i); reset('intro');
+  ['menu', 'end', 'puz'].forEach(id => { $(id).hidden = true; });
+  $('inLv').textContent = 'Fase ' + (i + 1) + ' de ' + LEVELS.length;
+  $('inTitle').textContent = L.name; $('inStory').textContent = L.story; $('inTip').textContent = 'Dica da fase: ' + L.tip;
+  $('intro').hidden = false; $('inGo').focus();
+}
+/* ---------- Salvar progresso ---------- */
+const SAVE_KEY = 'davi-save-v1';
+let SV = { done: [], cur: null };
+try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { const o = JSON.parse(raw); if (o && Array.isArray(o.done)) SV = { done: o.done, cur: o.cur || null }; } } catch (_) {}
+function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(SV)); return true; } catch (_) { return false; } }
+function snapshot() {
+  return {
+    lv: LV, diff: $('optDiff').value, p: { x: Math.round(S.p.x), y: Math.round(S.p.y) },
+    stress: Math.round(S.stress), battery: Math.round(S.battery), time: Math.round(S.time), shut: S.shutCount, helps: S.helps, hpOn: S.hpOn,
+    code: S.code.slice(), solved: S.solved.slice(), helpers: S.helpers.map(h => !!h.used), batteries: S.batteries.map(b => !!b.got),
+    gate: gatePos.length > 0 && gatePos.every(g => grid[g[1]][g[0]] === 0)
+  };
+}
+function saveGame() {
+  if (!S || (S.state !== 'play' && S.state !== 'puzzle')) return false;
+  SV.cur = snapshot(); const ok = writeSave(); refreshMenu(); return ok;
+}
+function markDone() { SV.done[LV] = true; SV.cur = null; writeSave(); refreshMenu(); }
+function refreshMenu() {
+  const c = SV.cur, has = !!(c && LEVELS[c.lv]);
+  $('contRow').hidden = !has;
+  if (has) $('contBtn').textContent = 'Continuar: fase ' + (c.lv + 1) + ' · ' + LEVELS[c.lv].name + ' (' + c.solved.filter(Boolean).length + '/' + NP + ' desafios)';
+  $('startBtn').textContent = has || SV.done.some(Boolean) ? 'Novo jogo (fase 1)' : 'Começar';
+  [...$('lvlSel').children].forEach((b, i) => b.classList.toggle('done', !!SV.done[i]));
+}
+function continueGame() {
+  const c = SV.cur; if (!c || !LEVELS[c.lv]) return;
+  if (DIFFS[c.diff]) { D = DIFFS[c.diff]; $('optDiff').value = c.diff; }
+  loadLevel(c.lv); begin();
+  if (c.code.length !== NP) return;
+  S.p.x = c.p.x; S.p.y = c.p.y; S.stress = Math.min(c.stress, 60); S.battery = c.battery; S.time = c.time; S.shutCount = c.shut; S.helps = c.helps;
+  S.code = c.code.slice(); S.solved = c.solved.slice(); S.digits = c.solved.map((v, i) => v ? S.code[i] : null);
+  S.helpers.forEach((h, i) => { h.used = !!c.helpers[i]; }); S.batteries.forEach((b, i) => { b.got = !!c.batteries[i]; });
+  if (c.hpOn && S.battery > 0) S.hpOn = true;
+  if (c.gate) gatePos.forEach(g => { grid[g[1]][g[0]] = 0; });
+  setMsg('Progresso carregado. Bom retorno!', 4);
+}
+setInterval(() => { if (S && S.state === 'play') saveGame(); }, 4000);
+addEventListener('pagehide', () => saveGame());
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
+
+function buildLevelSel() {
+  const box = $('lvlSel');
+  LEVELS.forEach((lv, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn ghost'; b.textContent = (i + 1) + ' · ' + lv.name;
+    b.addEventListener('click', () => { if (i === 0) startLevel(0); else showIntro(i); });
+    box.appendChild(b);
+  });
+}
+$('startBtn').addEventListener('click', () => startLevel(0));
+$('againBtn').addEventListener('click', () => startLevel(LV));
+$('nextBtn').addEventListener('click', () => { if (LV < LEVELS.length - 1) showIntro(LV + 1); else startLevel(0); });
+$('inGo').addEventListener('click', begin);
+$('contBtn').addEventListener('click', continueGame);
+$('clrBtn').addEventListener('click', () => { if (confirm('Apagar todo o progresso salvo?')) { SV = { done: [], cur: null }; writeSave(); refreshMenu(); } });
+$('saveBtn').addEventListener('click', () => {
+  if (S.state === 'puzzle') closeModal();
+  if (S.state !== 'play') { ['menu'].forEach(id => { $(id).hidden = false; }); return; }
+  saveGame(); S.state = 'menu'; ['end', 'puz', 'intro'].forEach(id => { $(id).hidden = true; }); $('menu').hidden = false;
+  for (const k in keys) keys[k] = false; joy.id = null; joy.x = 0; joy.y = 0; refreshMenu(); $('contBtn').focus();
+});
+
+loadLevel(0); reset('menu'); resize(); buildLevelSel(); refreshMenu(); $('menuTip').textContent = 'Dica: ' + rnd('dica');
+window.__game = { get S() { return S; }, get goal() { return goal; }, get quiets() { return quiets; }, get speakers() { return speakers; }, get totens() { return totens; }, get gatePos() { return gatePos; }, get grid() { return grid; }, get L() { return L; }, get W() { return W; }, get H() { return H; }, get START() { return START; }, get helperPos() { return helperPos; }, get batteryPos() { return batteryPos; }, LEVELS, startLevel, loadLevel, openTotem, openCode, api };
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
